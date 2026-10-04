@@ -15,13 +15,37 @@ function hasAttackAt(attacks, x, y) {
 function renderBoard(gameboard, container, showShips = false) {
 	container.innerHTML = "";
 
+	const corner = document.createElement("span");
+	corner.classList.add("coordinate-label", "coordinate-corner");
+	container.appendChild(corner);
+
+	for (let x = 0; x < 10; x += 1) {
+		const label = document.createElement("span");
+
+		label.classList.add("coordinate-label");
+		label.textContent = String.fromCharCode(65 + x);
+
+		container.appendChild(label);
+	}
+
 	for (let y = 0; y < 10; y += 1) {
+		const rowLabel = document.createElement("span");
+
+		rowLabel.classList.add("coordinate-label");
+		rowLabel.textContent = y + 1;
+
+		container.appendChild(rowLabel);
+
 		for (let x = 0; x < 10; x += 1) {
 			const cell = document.createElement("button");
 
 			cell.classList.add("board-cell");
 			cell.dataset.x = x;
 			cell.dataset.y = y;
+			cell.setAttribute(
+				"aria-label",
+				`${String.fromCharCode(65 + x)}${y + 1}`
+			);
 
 			if (
 				showShips &&
@@ -31,13 +55,21 @@ function renderBoard(gameboard, container, showShips = false) {
 			}
 
 			if (
-				hasAttackAt(gameboard.successfulAttacks, x, y)
+				hasAttackAt(
+					gameboard.successfulAttacks,
+					x,
+					y
+				)
 			) {
 				cell.classList.add("hit");
 			}
 
 			if (
-				hasAttackAt(gameboard.missedAttacks, x, y)
+				hasAttackAt(
+					gameboard.missedAttacks,
+					x,
+					y
+				)
 			) {
 				cell.classList.add("miss");
 			}
@@ -51,25 +83,36 @@ function renderStatus(game) {
 	const status = document.querySelector("#game-status");
 
 	if (game.computerPlayer.gameboard.allShipsSunk()) {
-		status.textContent = "Mission accomplished. You win!";
+		status.textContent =
+			"VICTORY — Enemy fleet destroyed.";
+		status.dataset.state = "victory";
 		return;
 	}
 
 	if (game.realPlayer.gameboard.allShipsSunk()) {
-		status.textContent = "Your fleet has been destroyed. Computer wins!";
+		status.textContent =
+			"DEFEAT — Your fleet has been destroyed.";
+		status.dataset.state = "defeat";
 		return;
 	}
 
 	if (!game.hasBattleStarted) {
 		status.textContent =
-			"Fleet deployment phase: randomize your ships, then strike the enemy board.";
+			"DEPLOYMENT — Position your fleet before engaging. Start attacking once you're ready.";
+		status.dataset.state = "deployment";
+		return;
+	}
+
+	if (game.currentTurn === "real") {
+		status.textContent =
+			"YOUR TURN — Select a target in enemy waters.";
+		status.dataset.state = "player";
 		return;
 	}
 
 	status.textContent =
-		game.currentTurn === "real"
-			? "Command ready: your turn."
-			: "Enemy movement detected: computer's turn.";
+		"ENEMY TURN — Incoming fire.";
+	status.dataset.state = "computer";
 }
 
 export function renderGame(game) {
