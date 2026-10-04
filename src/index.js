@@ -5,6 +5,7 @@ import "./styles.css";
 const game = new Game();
 
 game.setupGame();
+game.randomizePlayerShips();
 renderGame(game);
 
 const computerBoard = document.querySelector("#computer-board");
@@ -33,6 +34,10 @@ computerBoard.addEventListener("click", (event) => {
 const randomizeButton = document.querySelector("#randomize-ships");
 
 randomizeButton.addEventListener("click", () => {
+	if (!game.canRandomizeShips()) {
+		return;
+	}
+
 	game.randomizePlayerShips();
 	renderGame(game);
 });
