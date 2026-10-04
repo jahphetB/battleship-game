@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack serve --config webpack.dev.js",
-    "build": "webpack --config webpack.prod.js"
+    "build": "webpack --config webpack.prod.js",
+    "testJ": "jest"
   },
   "repository": {
     "type": "git",
@@ -21,9 +22,11 @@
   },
   "homepage": "https://github.com/jahphetB/webpack-template#readme",
   "devDependencies": {
+    "@babel/preset-env": "^7.29.7",
     "css-loader": "^7.1.5",
     "html-loader": "^5.1.0",
     "html-webpack-plugin": "^5.6.8",
+    "jest": "^30.5.2",
     "style-loader": "^4.0.0",
     "webpack": "^5.110.3",
     "webpack-cli": "^7.2.3",
