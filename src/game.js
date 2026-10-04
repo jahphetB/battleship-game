@@ -6,6 +6,7 @@ export default class Game {
 		this.computerPlayer = new Player("computer");
 		this.currentTurn = "real";
         this.computerAttacks = new Set();
+        this.computerTargets = [];
         this.hasBattleStarted = false;
 	}
 
@@ -24,25 +25,48 @@ export default class Game {
     }
 
     computerAttack() {
-        if (this.currentTurn !== "computer" || this.isGameOver()) {
+        if (
+            this.currentTurn !== "computer" ||
+            this.isGameOver()
+        ) {
             return;
         }
 
         this.hasBattleStarted = true;
 
         let coordinates;
-        let key;
 
-        do {
-            const x = Math.floor(Math.random() * 10);
-            const y = Math.floor(Math.random() * 10);
+        if (this.computerTargets.length > 0) {
+            coordinates = this.computerTargets.shift();
+        } else {
+            let key;
 
-            coordinates = [x, y];
-            key = `${x},${y}`;
-        } while (this.computerAttacks.has(key));
+            do {
+                const x = Math.floor(Math.random() * 10);
+                const y = Math.floor(Math.random() * 10);
+
+                coordinates = [x, y];
+                key = `${x},${y}`;
+            } while (this.computerAttacks.has(key));
+        }
+
+        const key = `${coordinates[0]},${coordinates[1]}`;
 
         this.computerAttacks.add(key);
+
         this.realPlayer.gameboard.receiveAttack(coordinates);
+
+        const wasHit =
+            this.realPlayer.gameboard.successfulAttacks.some(
+                ([x, y]) =>
+                    x === coordinates[0] &&
+                    y === coordinates[1]
+            );
+
+        if (wasHit) {
+            this.queueAdjacentTargets(coordinates);
+        }
+
         this.currentTurn = "real";
     }
 
@@ -160,6 +184,42 @@ export default class Game {
                     length,
                     coordinates
                 );
+            }
+        });
+    }
+
+    getAdjacentCoordinates([x, y]) {
+        return [
+            [x + 1, y],
+            [x - 1, y],
+            [x, y + 1],
+            [x, y - 1],
+        ].filter(
+            ([targetX, targetY]) =>
+                targetX >= 0 &&
+                targetX <= 9 &&
+                targetY >= 0 &&
+                targetY <= 9
+        );
+    }
+
+    queueAdjacentTargets(coordinates) {
+        const adjacentCoordinates =
+            this.getAdjacentCoordinates(coordinates);
+
+        adjacentCoordinates.forEach(([x, y]) => {
+            const key = `${x},${y}`;
+
+            const alreadyQueued = this.computerTargets.some(
+                ([targetX, targetY]) =>
+                    targetX === x && targetY === y
+            );
+
+            if (
+                !this.computerAttacks.has(key) &&
+                !alreadyQueued
+            ) {
+                this.computerTargets.push([x, y]);
             }
         });
     }

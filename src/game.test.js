@@ -38,6 +38,7 @@ test("computer can attack the real player's gameboard", () => {
 
 	jest.spyOn(Math, "random").mockReturnValue(0);
 
+	game.currentTurn = "computer";
 	game.computerAttack();
 
 	expect(ship.hits).toBe(1);
@@ -50,6 +51,7 @@ test("turn switches back to real player after computer attacks", () => {
 
 	jest.spyOn(Math, "random").mockReturnValue(0);
 
+	game.currentTurn = "computer";
 	game.computerAttack();
 
 	expect(game.currentTurn).toBe("real");
@@ -69,7 +71,10 @@ test("computer does not attack the same coordinate twice", () => {
 		.mockReturnValueOnce(0.1)
 		.mockReturnValueOnce(0.1);
 
+	game.currentTurn = "computer";
 	game.computerAttack();
+
+	game.currentTurn = "computer";
 	game.computerAttack();
 
 	expect(game.realPlayer.gameboard.missedAttacks).toEqual([
@@ -122,4 +127,35 @@ test("randomizePlayerShips places the full fleet", () => {
 		.sort((a, b) => b - a);
 
 	expect(shipLengths).toEqual([5, 4, 3, 3, 2]);
+});
+
+test("computer attacks an adjacent coordinate after hitting a ship", () => {
+	const game = new Game();
+
+	const ship = game.realPlayer.gameboard.placeShip(2, [
+		[0, 0],
+		[1, 0],
+	]);
+
+	jest
+		.spyOn(Math, "random")
+		.mockReturnValueOnce(0)
+		.mockReturnValueOnce(0)
+		.mockReturnValueOnce(0)
+		.mockReturnValueOnce(0)
+		.mockReturnValueOnce(0.9)
+		.mockReturnValueOnce(0.9);
+
+	game.currentTurn = "computer";
+	game.computerAttack();
+
+	expect(ship.hits).toBe(1);
+
+	game.currentTurn = "computer";
+	game.computerAttack();
+
+	expect(ship.hits).toBe(2);
+	expect(game.computerAttacks.has("1,0")).toBe(true);
+
+	Math.random.mockRestore();
 });
