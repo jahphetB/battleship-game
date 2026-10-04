@@ -6,14 +6,30 @@ export default class Game {
 		this.computerPlayer = new Player("computer");
 		this.currentTurn = "real";
         this.computerAttacks = new Set();
+        this.hasBattleStarted = false;
 	}
+
+    canRandomizeShips() {
+        return !this.hasBattleStarted;
+    }
 
 	attack(coordinates) {
-		this.computerPlayer.gameboard.receiveAttack(coordinates);
-		this.currentTurn = "computer";
-	}
+        if (this.currentTurn !== "real" || this.isGameOver()) {
+            return;
+        }
+
+        this.hasBattleStarted = true;
+        this.computerPlayer.gameboard.receiveAttack(coordinates);
+        this.currentTurn = "computer";
+    }
 
     computerAttack() {
+        if (this.currentTurn !== "computer" || this.isGameOver()) {
+            return;
+        }
+
+        this.hasBattleStarted = true;
+
         let coordinates;
         let key;
 
@@ -106,5 +122,45 @@ export default class Game {
             [9, 8],
             [9, 9],
         ]);
+    }
+
+    randomizePlayerShips() {
+        if (!this.canRandomizeShips()) {
+            return;
+        }
+
+        const fleet = [5, 4, 3, 3, 2];
+
+        this.realPlayer.gameboard.ships = [];
+
+        fleet.forEach((length) => {
+            let placedShip = null;
+
+            while (!placedShip) {
+                const isHorizontal = Math.random() < 0.5;
+
+                const startX = isHorizontal
+                    ? Math.floor(Math.random() * (11 - length))
+                    : Math.floor(Math.random() * 10);
+
+                const startY = isHorizontal
+                    ? Math.floor(Math.random() * 10)
+                    : Math.floor(Math.random() * (11 - length));
+
+                const coordinates = [];
+
+                for (let i = 0; i < length; i += 1) {
+                    coordinates.push([
+                        isHorizontal ? startX + i : startX,
+                        isHorizontal ? startY : startY + i,
+                    ]);
+                }
+
+                placedShip = this.realPlayer.gameboard.placeShip(
+                    length,
+                    coordinates
+                );
+            }
+        });
     }
 }

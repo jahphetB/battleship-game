@@ -1,0 +1,30 @@
+.boards {
+	display: flex;
+	gap: 3rem;
+}
+
+#player-board,
+#computer-board {
+	display: grid;
+	grid-template-columns: repeat(10, 35px);
+	grid-template-rows: repeat(10, 35px);
+}
+
+.board-cell {
+	width: 35px;
+	height: 35px;
+	border: 1px solid #333;
+	cursor: pointer;
+}
+
+.ship {
+	background-color: gray;
+}
+
+.hit {
+	background-color: red;
+}
+
+.miss {
+	background-color: lightblue;
+}

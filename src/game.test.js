@@ -111,3 +111,15 @@ test("setupGame places ships on both players' gameboards", () => {
 	expect(game.realPlayer.gameboard.ships.length).toBeGreaterThan(0);
 	expect(game.computerPlayer.gameboard.ships.length).toBeGreaterThan(0);
 });
+
+test("randomizePlayerShips places the full fleet", () => {
+	const game = new Game();
+
+	game.randomizePlayerShips();
+
+	const shipLengths = game.realPlayer.gameboard.ships
+		.map(({ ship }) => ship.length)
+		.sort((a, b) => b - a);
+
+	expect(shipLengths).toEqual([5, 4, 3, 3, 2]);
+});

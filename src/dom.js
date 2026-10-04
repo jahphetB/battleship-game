@@ -47,9 +47,35 @@ function renderBoard(gameboard, container, showShips = false) {
 	}
 }
 
+function renderStatus(game) {
+	const status = document.querySelector("#game-status");
+
+	if (game.computerPlayer.gameboard.allShipsSunk()) {
+		status.textContent = "Mission accomplished. You win!";
+		return;
+	}
+
+	if (game.realPlayer.gameboard.allShipsSunk()) {
+		status.textContent = "Your fleet has been destroyed. Computer wins!";
+		return;
+	}
+
+	if (!game.hasBattleStarted) {
+		status.textContent =
+			"Fleet deployment phase: randomize your ships, then strike the enemy board.";
+		return;
+	}
+
+	status.textContent =
+		game.currentTurn === "real"
+			? "Command ready: your turn."
+			: "Enemy movement detected: computer's turn.";
+}
+
 export function renderGame(game) {
 	const playerBoard = document.querySelector("#player-board");
 	const computerBoard = document.querySelector("#computer-board");
+    const randomizeButton = document.querySelector("#randomize-ships");
 
 	renderBoard(
 		game.realPlayer.gameboard,
@@ -62,4 +88,10 @@ export function renderGame(game) {
 		computerBoard,
 		false
 	);
+
+    renderStatus(game);
+
+    if (randomizeButton) {
+        randomizeButton.disabled = !game.canRandomizeShips();
+    }
 }
