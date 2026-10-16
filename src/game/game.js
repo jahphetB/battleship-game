@@ -4,57 +4,100 @@ import FleetPlacement, { FLEET_LENGTHS } from "./fleetPlacement.js";
 
 export default class Game {
   constructor({ fleetPlacement = new FleetPlacement(), random = Math.random } = {}) {
-    this.realPlayer = new Player("real");
-    this.computerPlayer = new Player("computer");
+    this.players = [new Player("human", "Player 1"), new Player("computer", "Computer")];
     this.fleetPlacement = fleetPlacement;
     this.random = random;
-    this.currentTurn = "real";
+    this.activePlayerIndex = 0;
+    this.readyPlayers = [false, false];
+    this.pendingPhase = null;
     this.computerTargets = [];
     this.phase = "setup";
     this.mode = null;
-    this.winner = null;
+    this.winnerIndex = null;
+  }
+
+  get currentPlayer() {
+    return this.players[this.activePlayerIndex];
+  }
+
+  get opponent() {
+    return this.players[1 - this.activePlayerIndex];
+  }
+
+  get winner() {
+    return this.winnerIndex === null ? null : this.players[this.winnerIndex];
   }
 
   setupGame({ mode = "computer" } = {}) {
-    if (this.phase !== "setup" || mode !== "computer") return false;
-    this.realPlayer.gameboard = this.fleetPlacement.createBoard();
-    this.computerPlayer.gameboard = this.fleetPlacement.createBoard();
+    if (this.phase !== "setup" || !["computer", "human"].includes(mode)) return false;
+    this.players = [
+      new Player("human", "Player 1"),
+      new Player(mode === "human" ? "human" : "computer", mode === "human" ? "Player 2" : "Computer"),
+    ];
+    for (const player of this.players) player.gameboard = this.fleetPlacement.createBoard();
     this.mode = mode;
-    this.phase = "placement";
+    if (mode === "human") this.beginHandoff(0, "placement");
+    else this.phase = "placement";
     return true;
   }
 
-  canRandomizeShips() {
-    return this.phase === "placement";
+  canRandomizeShips(playerIndex = this.activePlayerIndex) {
+    return this.phase === "placement" && [0, 1].includes(playerIndex) &&
+      !this.readyPlayers[playerIndex] && (this.mode === "computer" || playerIndex === this.activePlayerIndex);
   }
 
-  randomizePlayerShips(playerType = "real") {
-    if (!this.canRandomizeShips()) return false;
-    const player = playerType === "real" ? this.realPlayer :
-      playerType === "computer" ? this.computerPlayer : null;
-    if (!player) return false;
-    player.gameboard = this.fleetPlacement.createBoard();
+  randomizePlayerShips(playerIndex = this.activePlayerIndex) {
+    if (!this.canRandomizeShips(playerIndex)) return false;
+    this.players[playerIndex].gameboard = this.fleetPlacement.createBoard();
     return true;
+  }
+
+  hasReadyFleets() {
+    return this.players.every(player => player.gameboard.hasCompleteFleet(FLEET_LENGTHS));
   }
 
   startBattle() {
-    if (this.phase !== "placement" ||
-        !this.realPlayer.gameboard.hasCompleteFleet(FLEET_LENGTHS) ||
-        !this.computerPlayer.gameboard.hasCompleteFleet(FLEET_LENGTHS)) return false;
+    if (this.mode !== "computer" || this.phase !== "placement" || !this.hasReadyFleets()) return false;
+    this.readyPlayers = [true, true];
     this.phase = "battle";
     return true;
   }
 
+  confirmFleet() {
+    if (this.mode !== "human" || this.phase !== "placement" ||
+        this.readyPlayers[this.activePlayerIndex] ||
+        !this.currentPlayer.gameboard.hasCompleteFleet(FLEET_LENGTHS)) return false;
+    if (this.activePlayerIndex === 1 && !this.hasReadyFleets()) return false;
+    this.readyPlayers[this.activePlayerIndex] = true;
+    if (this.activePlayerIndex === 0) this.beginHandoff(1, "placement");
+    else this.beginHandoff(0, "battle");
+    return true;
+  }
+
+  beginHandoff(playerIndex, nextPhase) {
+    this.activePlayerIndex = playerIndex;
+    this.pendingPhase = nextPhase;
+    this.phase = "handoff";
+  }
+
+  acknowledgeHandoff() {
+    if (this.phase !== "handoff") return false;
+    this.phase = this.pendingPhase;
+    this.pendingPhase = null;
+    return true;
+  }
+
   attack(coordinates) {
-    if (this.phase !== "battle" || this.currentTurn !== "real") return { accepted: false };
-    const outcome = this.computerPlayer.gameboard.receiveAttack(coordinates);
-    if (outcome.accepted) this.finishTurn("real", this.computerPlayer.gameboard, "computer");
+    if (this.phase !== "battle" || this.currentPlayer.type !== "human") return { accepted: false };
+    const board = this.opponent.gameboard;
+    const outcome = board.receiveAttack(coordinates);
+    if (outcome.accepted) this.finishTurn(board);
     return outcome;
   }
 
   computerAttack() {
-    if (this.phase !== "battle" || this.currentTurn !== "computer") return { accepted: false };
-    const board = this.realPlayer.gameboard;
+    if (this.phase !== "battle" || this.currentPlayer.type !== "computer") return { accepted: false };
+    const board = this.players[0].gameboard;
     let coordinates;
     while (this.computerTargets.length > 0 && !coordinates) {
       const target = this.computerTargets.shift();
@@ -73,17 +116,19 @@ export default class Game {
     const outcome = board.receiveAttack(coordinates);
     if (outcome.accepted) {
       if (outcome.hit) this.queueAdjacentTargets(coordinates);
-      this.finishTurn("computer", board, "real");
+      this.finishTurn(board);
     }
     return outcome;
   }
 
-  finishTurn(attacker, defendingBoard, nextTurn) {
+  finishTurn(defendingBoard) {
     if (defendingBoard.allShipsSunk()) {
-      this.winner = attacker;
+      this.winnerIndex = this.activePlayerIndex;
       this.phase = "completed";
+    } else if (this.mode === "human") {
+      this.beginHandoff(1 - this.activePlayerIndex, "battle");
     } else {
-      this.currentTurn = nextTurn;
+      this.activePlayerIndex = 1 - this.activePlayerIndex;
     }
   }
 
@@ -94,7 +139,7 @@ export default class Game {
   queueAdjacentTargets([x, y]) {
     for (const [targetX, targetY] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
       if (targetX < 0 || targetX >= BOARD_SIZE || targetY < 0 || targetY >= BOARD_SIZE) continue;
-      if (!this.realPlayer.gameboard.hasAttackAt([targetX, targetY]) &&
+      if (!this.players[0].gameboard.hasAttackAt([targetX, targetY]) &&
           !this.computerTargets.some(([queuedX, queuedY]) => queuedX === targetX && queuedY === targetY)) {
         this.computerTargets.push([targetX, targetY]);
       }
