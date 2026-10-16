@@ -1,11 +1,13 @@
 import Player from "../models/player.js";
-import { BOARD_SIZE } from "../models/gameboard.js";
+import Gameboard, { BOARD_SIZE } from "../models/gameboard.js";
 import FleetPlacement, { FLEET_LENGTHS } from "./fleetPlacement.js";
+import ManualPlacement from "./manualPlacement.js";
 
 export default class Game {
-  constructor({ fleetPlacement = new FleetPlacement(), random = Math.random } = {}) {
+  constructor({ fleetPlacement = new FleetPlacement(), manualPlacement = new ManualPlacement(), random = Math.random } = {}) {
     this.players = [new Player("human", "Player 1"), new Player("computer", "Computer")];
     this.fleetPlacement = fleetPlacement;
+    this.manualPlacement = manualPlacement;
     this.random = random;
     this.activePlayerIndex = 0;
     this.readyPlayers = [false, false];
@@ -51,6 +53,22 @@ export default class Game {
     if (!this.canRandomizeShips(playerIndex)) return false;
     this.players[playerIndex].gameboard = this.fleetPlacement.createBoard();
     return true;
+  }
+
+  clearPlayerFleet() {
+    if (!this.canRandomizeShips()) return false;
+    this.currentPlayer.gameboard = new Gameboard();
+    return true;
+  }
+
+  previewPlayerShip(shipId, origin, orientation) {
+    if (!this.canRandomizeShips()) return { valid: false, coordinates: [] };
+    return this.manualPlacement.preview(this.currentPlayer.gameboard, shipId, origin, orientation);
+  }
+
+  placePlayerShip(shipId, origin, orientation) {
+    if (!this.canRandomizeShips()) return false;
+    return this.manualPlacement.place(this.currentPlayer.gameboard, shipId, origin, orientation);
   }
 
   hasReadyFleets() {

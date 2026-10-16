@@ -14,7 +14,7 @@ export default class Gameboard {
       coordinate.every(value => Number.isInteger(value) && value >= 0 && value < BOARD_SIZE);
   }
 
-  canPlaceShip(length, coordinates) {
+  canPlaceShip(length, coordinates, { ignoreShipId = null } = {}) {
     if (!Number.isInteger(length) || length < 1 || length > BOARD_SIZE ||
         !Array.isArray(coordinates) || coordinates.length !== length ||
         !coordinates.every(coordinate => this.isValidCoordinate(coordinate))) return false;
@@ -25,15 +25,22 @@ export default class Gameboard {
     const positions = coordinates.map(([x, y]) => horizontal ? x : y).sort((a, b) => a - b);
     if (!positions.every((value, index) => value === positions[0] + index)) return false;
 
-    return !this.ships.some(({ coordinates: existing }) =>
+    return !this.ships.filter(entry => entry.id !== ignoreShipId).some(({ coordinates: existing }) =>
       existing.some(([shipX, shipY]) => coordinates.some(([x, y]) => x === shipX && y === shipY)));
   }
 
-  placeShip(length, coordinates) {
-    if (!this.canPlaceShip(length, coordinates)) return null;
+  placeShip(length, coordinates, id = `ship-${this.ships.length}`) {
+    if (this.ships.some(entry => entry.id === id) || !this.canPlaceShip(length, coordinates)) return null;
     const ship = new Ship(length);
-    this.ships.push({ ship, coordinates: coordinates.map(coordinate => [...coordinate]) });
+    this.ships.push({ id, ship, coordinates: coordinates.map(coordinate => [...coordinate]) });
     return ship;
+  }
+
+  moveShip(id, coordinates) {
+    const entry = this.ships.find(ship => ship.id === id);
+    if (!entry || !this.canPlaceShip(entry.ship.length, coordinates, { ignoreShipId: id })) return false;
+    entry.coordinates = coordinates.map(coordinate => [...coordinate]);
+    return true;
   }
 
   hasAttackAt([x, y]) {
