@@ -117,7 +117,7 @@
 		box-shadow 0.12s ease;
 }
 
-#computer-board .board-cell:not(.hit):not(.miss):hover {
+#computer-board .board-cell:not(:disabled):not(.hit):not(.miss):hover {
 	z-index: 2;
 	transform: scale(1.08);
 	border-color: rgba(255, 98, 70, 0.9);
@@ -132,7 +132,7 @@
 		0 0 15px rgba(255, 80, 58, 0.45);
 }
 
-#computer-board .board-cell:not(.hit):not(.miss):hover::after {
+#computer-board .board-cell:not(:disabled):not(.hit):not(.miss):hover::after {
 	content: "+";
 	position: absolute;
 	inset: 0;
@@ -294,3 +294,5 @@
 		font-size: 0.55rem;
 	}
 }
+.board-cell:disabled { cursor: default; }
+.board-cell:focus-visible { outline: 3px solid var(--radar); outline-offset: 1px; z-index: 2; }

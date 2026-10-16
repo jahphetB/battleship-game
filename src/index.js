@@ -5,41 +5,23 @@ import "./styles/commandPanel.css";
 import "./styles/board.css";
 
 const game = new Game();
-
 game.setupGame();
-game.randomizePlayerShips();
 renderGame(game);
 
 const computerBoard = document.querySelector("#computer-board");
-
-computerBoard.addEventListener("click", (event) => {
-	const cell = event.target.closest(".board-cell");
-
-	if (!cell || game.currentTurn !== "real" || game.isGameOver()) {
-		return;
-	}
-
-	const x = Number(cell.dataset.x);
-	const y = Number(cell.dataset.y);
-
-	game.attack([x, y]);
-	renderGame(game);
-
-	if (game.isGameOver()) {
-		return;
-	}
-
-	game.computerAttack();
-	renderGame(game);
+computerBoard.addEventListener("click", event => {
+  const cell = event.target.closest(".board-cell");
+  if (!cell || !computerBoard.contains(cell)) return;
+  const outcome = game.attack([Number(cell.dataset.x), Number(cell.dataset.y)]);
+  if (!outcome.accepted) return;
+  game.computerAttack();
+  renderGame(game);
 });
 
-const randomizeButton = document.querySelector("#randomize-ships");
+document.querySelector("#randomize-ships").addEventListener("click", () => {
+  if (game.randomizePlayerShips()) renderGame(game);
+});
 
-randomizeButton.addEventListener("click", () => {
-	if (!game.canRandomizeShips()) {
-		return;
-	}
-
-	game.randomizePlayerShips();
-	renderGame(game);
+document.querySelector("#start-battle").addEventListener("click", () => {
+  if (game.startBattle()) renderGame(game);
 });

@@ -1,34 +1,16 @@
 export function renderStatus(game, status) {
-	if (game.computerPlayer.gameboard.allShipsSunk()) {
-		status.textContent =
-			"VICTORY — Enemy fleet destroyed.";
-		status.dataset.state = "victory";
-		return;
-	}
-
-	if (game.realPlayer.gameboard.allShipsSunk()) {
-		status.textContent =
-			"DEFEAT — Your fleet has been destroyed.";
-		status.dataset.state = "defeat";
-		return;
-	}
-
-	if (!game.hasBattleStarted) {
-		status.textContent =
-			"DEPLOYMENT — Position your fleet before engaging. Start attacking once you're ready.";
-		status.dataset.state = "deployment";
-		return;
-	}
-
-	if (game.currentTurn === "real") {
-		status.textContent =
-			"YOUR TURN — Select a target in enemy waters.";
-		status.dataset.state = "player";
-		return;
-	}
-
-	status.textContent =
-		"ENEMY TURN — Incoming fire.";
-	status.dataset.state = "computer";
+  let state = "setup";
+  let message = "BRIEFING: Choose your mission to begin.";
+  if (game.phase === "completed") {
+    state = game.winner === "real": "victory" : "defeat";
+    message = game.winner === "real": "VICTORY: Enemy fleet destroyed." : "DEFEAT: Your fleet has been destroyed.";
+  } else if (game.phase === "placement") {
+    state = "deployment";
+    message = "DEPLOYMENT: Randomize your fleet, then select Start Battle when ready.";
+  } else if (game.phase === "battle") {
+    state = game.currentTurn === "real": "player" : "computer";
+    message = game.currentTurn === "real": "YOUR TURN: Select a target in enemy waters." : "ENEMY TURN: Incoming fire.";
+  }
+  status.textContent = message;
+  status.dataset.state = state;
 }
-

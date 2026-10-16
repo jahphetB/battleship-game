@@ -10,6 +10,7 @@ This is a vanilla JavaScript application using Webpack and Jest. Preserve the ex
 | `models/gameboard.js` | Own ships and attack history; validate placement and resolve attacks. | `Ship` |
 | `models/player.js` | Represent a participant and own that participant's board. | `Gameboard` |
 | `game/game.js` | Coordinate participants, turns, setup, and game completion. | `Player` |
+| `game/fleetPlacement.js` | Generate fresh complete fleets using legal candidate placements. | `Gameboard` and an injected random function |
 | `components/board.js` | Render one supplied board, including coordinates and shot markers. | Supplied board and DOM container |
 | `components/status.js` | Render the current status into a supplied DOM element. | Supplied game and status element |
 | `components/gameView.js` | Connect game state to the page's board, status, and randomize controls. | Board/status renderers and page elements |
@@ -26,7 +27,11 @@ The dependency flow is `index -> game -> models` and `index -> gameView -> rende
 - As placement expands, extract reusable fleet placement behavior. Random and manual placement must share board validation.
 - Introduce only the contracts needed by an approved feature. The current refactor establishes boundaries; it does not claim to finish every SOLID improvement.
 
-`Game` still contains the existing fixed setup, random placement, and adjacent targeting logic. Those behaviors are deliberately preserved in milestone one and will be separated as subsequent milestones need them.
+`Game` receives a fleet generator through its constructor and owns the round lifecycle: `setup -> placement -> battle -> completed`. A separate handoff phase will be introduced with local multiplayer. Both players now use randomized fleets. The existing adjacent computer targeting remains in `Game` until the difficulty milestone.
+
+`Gameboard.receiveAttack()` returns an explicit accepted/rejected outcome, including hit and sunk information for accepted shots. Only accepted attacks advance the turn. Board validation checks integer bounds, coordinate count, straight alignment, contiguity, uniqueness, and overlap. Stored coordinates are copied so caller mutations cannot alter the board accidentally.
+
+Fleet generation samples legal placements rather than retrying random positions indefinitely. The injected random source makes placement and attack tests repeatable. Starting battle requires the complete fleet `[5, 4, 3, 3, 2]` on both boards; setup and completed rounds reject attacks, and battle/completed rounds reject randomization.
 
 ## Styles and tests
 

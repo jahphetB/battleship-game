@@ -14,19 +14,22 @@
         </header>
 
         <section class="command-panel">
-            <div id="game-status"></div>
-            <button id="randomize-ships">Randomize Ships</button>
+            <div id="game-status" role="status" aria-live="polite"></div>
+            <div class="command-actions">
+                <button id="randomize-ships" class="command-button" type="button">Randomize Ships</button>
+                <button id="start-battle" class="command-button" type="button">Start Battle</button>
+            </div>
         </section>
 
         <div class="boards">
             <section class="board-section">
                 <h2>Your Fleet</h2>
-                <div id="player-board"></div>
+                <div id="player-board" aria-label="Your fleet"></div>
             </section>
 
             <section class="board-section">
                 <h2>Enemy Waters</h2>
-                <div id="computer-board"></div>
+                <div id="computer-board" aria-label="Enemy waters"></div>
             </section>
         </div>
     </main>

@@ -12,7 +12,7 @@ function hasAttackAt(attacks, x, y) {
 	);
 }
 
-export function renderBoard(gameboard, container, showShips = false) {
+export function renderBoard(gameboard, container, { showShips = false, interactive = false } = {}) {
 	container.innerHTML = "";
 
 	const corner = document.createElement("span");
@@ -40,6 +40,8 @@ export function renderBoard(gameboard, container, showShips = false) {
 			const cell = document.createElement("button");
 
 			cell.classList.add("board-cell");
+			cell.type = "button";
+			cell.disabled = !interactive || gameboard.hasAttackAt([x, y]);
 			cell.dataset.x = x;
 			cell.dataset.y = y;
 			cell.setAttribute(
