@@ -58,6 +58,19 @@
             <button class="command-button briefing-submit" type="submit">Deploy Fleet</button>
         </form>
     </dialog>
+    <dialog id="result-dialog" class="briefing-dialog result-dialog" aria-labelledby="result-title" aria-describedby="result-message">
+        <div class="briefing-form">
+            <header>
+                <p class="eyebrow">Naval Command / Round Complete</p>
+                <h2 id="result-title" tabindex="-1"></h2>
+                <p id="result-message"></p>
+            </header>
+            <div class="result-actions">
+                <button id="view-boards" class="command-button" type="button">View Boards</button>
+                <button id="next-level" class="command-button" type="button" hidden>Next Level</button>
+            </div>
+        </div>
+    </dialog>
     <main>
         <header class="battlefield-header">
             <p class="eyebrow">Naval Command</p>
@@ -79,6 +92,7 @@
             <div class="command-actions">
                 <button id="randomize-ships" class="command-button" type="button">Randomize Ships</button>
                 <button id="start-battle" class="command-button" type="button">Start Battle</button>
+                <button id="restart-round" class="command-button" type="button" hidden>Restart Round</button>
             </div>
         </section>
 

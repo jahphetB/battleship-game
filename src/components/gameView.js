@@ -34,6 +34,7 @@ export function renderGame(game, placementControls) {
   startButton.hidden = game.phase !== "placement";
   startButton.textContent = game.mode === "human" ? "Confirm Fleet" : "Start Battle";
   startButton.disabled = !game.hasReadyFleets();
+  document.querySelector("#restart-round").hidden = game.phase !== "completed";
   placementControls?.render();
 }
 
@@ -41,6 +42,6 @@ export function focusGameAction(game) {
   const selector = game.phase === "handoff" ? "#handoff-continue"
     : game.phase === "placement" ? "#randomize-ships"
     : game.phase === "battle" ? "#opponent-board button:not(:disabled)"
-    : "#game-status";
+    : game.phase === "completed" ? "#restart-round" : "#game-status";
   document.querySelector(selector)?.focus();
 }

@@ -69,3 +69,9 @@
 .difficulty-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .difficulty-picker .briefing-note { grid-column: 1 / -1; }
 @media (max-width: 600px) { .difficulty-picker { grid-template-columns: 1fr; } }
+
+.result-dialog { width: min(31rem, calc(100% - 2rem)); }
+.result-dialog #result-title:focus { outline: none; }
+.result-dialog #result-message { color: var(--text-muted); }
+.result-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+.result-actions .command-button { flex: 1 1 10rem; }
