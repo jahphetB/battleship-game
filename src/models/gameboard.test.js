@@ -92,3 +92,65 @@ test("does not place a ship outside the gameboard", () => {
 	expect(gameboard.ships.length).toBe(0);
 });
 
+
+
+test.each([
+  [3, [[0, 0], [1, 0]]],
+  [2, [[0, 0], [1, 1]]],
+  [2, [[0, 0], [2, 0]]],
+  [2, [[0, 0], [0, 0]]],
+  [1, [[0.5, 0]]],
+  [1, [["0", 0]]],
+  [0, []],
+  [11, []],
+  [2, null],
+  [1, [[0]]],
+])("rejects invalid placement %# without changing the board", (length, coordinates) => {
+  const board = new Gameboard();
+  expect(board.placeShip(length, coordinates)).toBeNull();
+  expect(board.ships).toHaveLength(0);
+});
+
+test("accepts contiguous coordinates in reverse order", () => {
+  expect(new Gameboard().placeShip(3, [[2, 9], [1, 9], [0, 9]])).not.toBeNull();
+});
+
+test.each([[-1, 0], [10, 0], [0, 1.5], [NaN, 0], ["0", 0], null, [0]])(
+  "rejects malformed or out-of-bounds attacks %#", coordinate => {
+    const board = new Gameboard();
+    expect(board.receiveAttack(coordinate)).toEqual({ accepted: false });
+    expect(board.missedAttacks).toEqual([]);
+  }
+);
+
+test("returns an explicit outcome and rejects duplicate misses", () => {
+  const board = new Gameboard();
+  expect(board.receiveAttack([9, 9])).toEqual({ accepted: true, hit: false, sunk: false });
+  expect(board.receiveAttack([9, 9])).toEqual({ accepted: false });
+  expect(board.missedAttacks).toHaveLength(1);
+});
+
+test("returns hit and sunk outcomes without double counting", () => {
+  const board = new Gameboard();
+  const ship = board.placeShip(2, [[0, 0], [1, 0]]);
+  expect(board.receiveAttack([0, 0])).toEqual({ accepted: true, hit: true, sunk: false });
+  expect(board.receiveAttack([1, 0])).toEqual({ accepted: true, hit: true, sunk: true });
+  expect(board.receiveAttack([0, 0])).toEqual({ accepted: false });
+  expect(ship.hits).toBe(2);
+});
+
+test("an empty board is not a defeated fleet", () => {
+  expect(new Gameboard().allShipsSunk()).toBe(false);
+});
+
+test("placement and attack records do not retain caller coordinate arrays", () => {
+  const board = new Gameboard();
+  const placement = [[0, 0]];
+  const attack = [0, 0];
+  board.placeShip(1, placement);
+  board.receiveAttack(attack);
+  placement[0][0] = 9;
+  attack[0] = 9;
+  expect(board.ships[0].coordinates).toEqual([[0, 0]]);
+  expect(board.successfulAttacks).toEqual([[0, 0]]);
+});
