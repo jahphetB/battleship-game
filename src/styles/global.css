@@ -1,0 +1,122 @@
+* {
+	box-sizing: border-box;
+}
+
+:root {
+	--military-dark: #101812;
+	--military-green: #283626;
+	--military-light: #687455;
+	--steel-dark: #202a2d;
+	--steel: #4d5b5e;
+	--ocean-dark: #071b29;
+	--ocean: #0c3a52;
+	--ocean-light: #185d76;
+	--radar: #84a967;
+	--text-main: #edf1e5;
+	--text-muted: #adb8a5;
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	font-family:
+		"Trebuchet MS",
+		Arial,
+		sans-serif;
+	color: var(--text-main);
+	background:
+		radial-gradient(
+			circle at 10% 20%,
+			rgba(73, 89, 57, 0.75) 0 8%,
+			transparent 9%
+		),
+		radial-gradient(
+			circle at 35% 70%,
+			rgba(38, 55, 35, 0.8) 0 13%,
+			transparent 14%
+		),
+		radial-gradient(
+			circle at 75% 15%,
+			rgba(89, 94, 59, 0.45) 0 11%,
+			transparent 12%
+		),
+		radial-gradient(
+			circle at 85% 75%,
+			rgba(28, 48, 36, 0.8) 0 15%,
+			transparent 16%
+		),
+		linear-gradient(
+			135deg,
+			#18241a,
+			#253321 35%,
+			#16271f 65%,
+			#101a16
+		);
+	background-attachment: fixed;
+}
+
+body::before {
+	content: "";
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	background:
+		repeating-linear-gradient(
+			0deg,
+			rgba(255, 255, 255, 0.012) 0,
+			rgba(255, 255, 255, 0.012) 1px,
+			transparent 1px,
+			transparent 4px
+		);
+}
+
+main {
+	width: min(1400px, 96%);
+	margin: 0 auto;
+	padding: 2.5rem 1rem 4rem;
+}
+
+.battlefield-header {
+	text-align: center;
+	margin-bottom: 1.75rem;
+}
+
+.eyebrow {
+	margin: 0;
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.32em;
+	color: #bac894;
+	text-transform: uppercase;
+}
+
+h1 {
+	margin: 0.25rem 0;
+	font-size: clamp(2.7rem, 6vw, 5rem);
+	font-weight: 900;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: #f0f3e6;
+	text-shadow:
+		0 3px 0 #141d16,
+		0 8px 20px rgba(0, 0, 0, 0.65);
+}
+
+.subheading {
+	margin: 0.4rem auto 0;
+	max-width: 650px;
+	color: var(--text-muted);
+	letter-spacing: 0.04em;
+}
+
+@media (max-width: 600px) {
+	main {
+		width: 100%;
+		padding: 1.25rem 0.6rem 2rem;
+	}
+
+	h1 {
+		font-size: 2.4rem;
+	}
+
+}

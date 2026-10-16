@@ -1,6 +1,8 @@
-import Game from "./game.js";
-import { renderGame } from "./dom.js";
-import "./styles.css";
+import Game from "./game/game.js";
+import { renderGame } from "./components/gameView.js";
+import "./styles/global.css";
+import "./styles/commandPanel.css";
+import "./styles/board.css";
 
 const game = new Game();
 
