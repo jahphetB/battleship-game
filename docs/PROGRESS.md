@@ -58,16 +58,40 @@ Verification:
 - Keyboard confirmation closes the dialog, restores focus to Randomize Ships, creates a 17-cell human fleet, conceals computer ships, and keeps attacks blocked until Start Battle.
 - A complete browser round reached defeat after 71 human shots and 71 computer shots, then disabled all targets and kept setup controls locked. Both winner outcomes are also covered by logic tests.
 
+## Milestone 4: Local human-versus-human play
+
+Completed:
+
+- Enabled Human vs human in the opening opponent picker, with instructions for private same-device play.
+- Generalized the OOP game model to named participants, an active-player index, per-player readiness, winner identity, and the last accepted shot. Computer play uses the same turn completion rules.
+- Added private fleet setup for Player 1 and Player 2. Each confirms their own complete fleet; confirmed fleets and the other player's fleet cannot be randomized.
+- Added explicit readiness handoffs before either player's setup, before the first shot, and after every non-winning local shot. Internal turn transitions are private class methods.
+- Added a separate handoff renderer and stylesheet. Both board containers are cleared before the handoff screen appears; the screen shows only the next player's name and the public shot result.
+- Added a pure view-selection function with privacy tests. Local play shows the active player's fleet and concealed opponent waters; computer play always retains the human perspective.
+- Added named turn/winner status, keyboard focus transfers, enabled-mode radio focus wrapping, and the neutral `opponent-board` DOM name.
+- Recorded standing commit/push permission for this repository in the README. Milestone progression remains approval-gated.
+
+Verification:
+
+- 8 Jest suites / 73 tests pass; production build and `git diff --check` pass.
+- Logic tests cover both local winners, independent fleet setup, incomplete-fleet rejection, confirmed-fleet locks, rejected/repeated shots, blocked handoff actions, and absence of computer actions in local mode.
+- Browser setup/turn checks verified five consecutive handoffs with zero board cells and zero ship cells in the DOM, focus on the named Continue button, and unchanged independent fleets when perspectives returned.
+- A complete mobile round at 390 x 844 ended with Player 2 winning after 78 shots per player. The continuation run checked 153 handoffs for zero board/ship cells and no horizontal page overflow. The winning shot completed the round immediately and left zero enabled targets.
+- Desktop private placement and handoff screens, plus mobile handoff and battle layouts, were visually inspected.
+- Keyboard arrows selected either mode; Tab/Shift+Tab wrapped through the selected radio and submit button. Keyboard confirmation routed to the appropriate local handoff or computer placement control.
+- A clean-load computer regression check reported zero application page errors: one human shot produced one computer response, all 17 human ship cells remained visible, enemy ships remained concealed, and no handoff appeared.
+
 ## Remaining milestones
 
-4. Add private setup and turn handoffs for same-device human versus human.
 5. Add manual ship placement, rotation, drag feedback, and accessible placement alternatives.
 6. Introduce easy, medium, and hard computer strategies using only observed battle information.
 7. Add result dialogs, winner fleet reveal, level progression, and restart after round completion.
 8. Verify complete rounds, all modes/levels, responsive and keyboard behavior, and update documentation.
 
-The rule issues identified during inspection are resolved. Computer difficulty strategies and local multiplayer remain upcoming features.
+The rule issues identified during inspection are resolved, and both play modes are available. Manual placement, difficulty strategies, and end-of-round controls remain upcoming features.
 
 Proposed campaign rule: start at level 1, unlock the next level after victory, retry the current level after defeat, and finish the campaign after level 3. Local human versus human uses standalone rounds.
 
 Each milestone should have at least two or three meaningful commits, verified before pushing to GitHub. Report the outcome and wait for approval before starting the next milestone.
+
+For this project only, the user has authorized committing and pushing verified work without separate approval.
