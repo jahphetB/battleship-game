@@ -55,6 +55,17 @@ Create a production build:
 npm run build
 ```
 
+## Deployment
+
+The project publishes to GitHub Pages at <https://jahphetb.github.io/battleship-game/>. Build and verify the production bundle first, then publish the generated `dist/` directory:
+
+```bash
+npm run build
+npm run deploy
+```
+
+`npm run deploy` uses the existing `gh-pages` script to publish `dist/` to the `gh-pages` branch. After publishing, reload the Pages URL and confirm the game opens with the current round setup.
+
 `npm run testJ` remains available as an alias. For a single-process test run, use `npm test -- --runInBand` (`npm.cmd` in PowerShell if argument forwarding fails).
 
 ## Project structure
