@@ -11,13 +11,15 @@ export default class Game {
     this.currentTurn = "real";
     this.computerTargets = [];
     this.phase = "setup";
+    this.mode = null;
     this.winner = null;
   }
 
-  setupGame() {
-    if (this.phase !== "setup") return false;
+  setupGame({ mode = "computer" } = {}) {
+    if (this.phase !== "setup" || mode !== "computer") return false;
     this.realPlayer.gameboard = this.fleetPlacement.createBoard();
     this.computerPlayer.gameboard = this.fleetPlacement.createBoard();
+    this.mode = mode;
     this.phase = "placement";
     return true;
   }

@@ -19,6 +19,20 @@ test("starts in setup with independent human and computer participants", () => {
   expect(game.randomizePlayerShips()).toBe(false);
 });
 
+test("unsupported modes leave setup untouched; a valid choice enters placement", () => {
+  const game = new Game();
+  expect(game.setupGame({ mode: "human" })).toBe(false);
+  expect(game.phase).toBe("setup");
+  expect(game.mode).toBeNull();
+  expect(game.realPlayer.gameboard.ships).toEqual([]);
+  expect(game.computerPlayer.gameboard.ships).toEqual([]);
+  expect(game.setupGame({ mode: "computer" })).toBe(true);
+  expect(game.mode).toBe("computer");
+  expect(game.phase).toBe("placement");
+  expect(game.setupGame({ mode: "human" })).toBe(false);
+  expect(game.mode).toBe("computer");
+});
+
 test("setup gives both players full randomized fleets and requires explicit start", () => {
   const game = new Game();
   expect(game.setupGame()).toBe(true);
