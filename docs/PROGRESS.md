@@ -150,9 +150,23 @@ Verification:
 - Browser: a Hard computer defeat revealed 17 computer ship cells, offered restart, and did not offer Next Level. An Easy victory offered Next Level and entered fresh Level 2 placement with the result dialog and restart control closed.
 - Browser console showed no application JavaScript errors; the pre-existing missing favicon request remains a 404.
 
-## Remaining milestone
+## Milestone 8: Final verification and release
 
-8. Check the complete cross-mode and cross-level flows, responsive and keyboard behavior, and update final documentation only where findings require it.
+Completed:
+
+- Reviewed the final cross-mode/cross-level evidence from milestones 6 and 7 rather than replaying those completed scenarios. The existing records cover Easy/Medium/Hard computer rounds, a local win, a computer loss, and advancing from a computer victory.
+- Checked the result dialog at 390 x 844: it stayed within the viewport (337 px wide, 19 px from the left edge), opened with heading focus, moved to View Boards on Tab, and returned focus to Restart Round after dismissal.
+- Built the production bundle and published `dist/` to GitHub Pages with the existing `npm run deploy` command.
+- Opened the public site in a fresh browser context. The current welcome briefing appeared with both modes and all three difficulty choices; current result/restart controls were present in the published markup.
+- Added GitHub Pages build and publish instructions to the README. No app code changes were needed during final verification.
+
+Verification:
+
+- Production build passed (Webpack 5.110.3; 46.9 KiB minimized main bundle).
+- The live GitHub Pages startup smoke check passed at `https://jahphetb.github.io/battleship-game/` with the cache-busted URL. One earlier reused browser context showed stale page state; a fresh isolated context loaded the published build correctly.
+- The 114-test suite and focused round-flow tests had already passed during milestone 7; they were not rerun because no game code changed in this verification milestone.
+
+All eight feature milestones are complete. Each milestone has two or three focused commits, and verified source/documentation changes are pushed to GitHub. Future feature work can be planned separately.
 
 Each milestone should have two or three meaningful commits, verified before pushing to GitHub. Report the outcome and wait for approval before starting the next milestone.
 
