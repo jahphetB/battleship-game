@@ -24,6 +24,7 @@ This is a vanilla JavaScript application using Webpack and Jest. Preserve the ex
 | `components/handoffPanel.js` | Render the next player's readiness screen and the last public shot result. | Supplied game and panel element |
 | `components/placementControls.js` | Own ship selection, orientation, pointer gestures, keyboard interaction, and placement feedback. | Injected game, panel, board container, and refresh callback |
 | `components/welcomeDialog.js` | Own modal lifecycle, mode form submission, focus wrapping, and focus restoration. | Supplied dialog, configuration callback, and focus target |
+| `components/resultDialog.js` | Present the completed-round result and optional next-level action. | Supplied dialog and game-transition callbacks |
 | `index.js` | Create the game, initialize it, import styles, and connect user events. | `Game`, game view, styles |
 
 The dependency flow is `index -> game -> models` and `index -> gameView -> renderers`. Models and game logic must not import browser rendering code or query the DOM.
@@ -63,7 +64,9 @@ The game validates Easy/Medium/Hard during setup, creates a fresh strategy, and 
 - Medium prioritizes unshot ends of contiguous aligned hits, then adjacent cells, then alternating search cells. It falls back to other legal cells once needed.
 - Hard enumerates remaining ship placements consistent with observed misses and sunk cells, prioritizes placements covering the most unresolved hits, and scores their unshot cells. It randomly breaks equal scores and uses an unfocused legal choice on 3% of decisions. This is a placement-scoring heuristic, not a guarantee of optimal play or a 97% hit rate.
 
-Every strategy samples only unshot cells and returns null after exhaustion. Seeded random injection makes focused/unfocused decisions and simulations repeatable. Individual games can vary even though the fixed test batch shows lower average shots for higher levels. Win-to-advance progression and next-level/restart controls remain milestone 7.
+Every strategy samples only unshot cells and returns null after exhaustion. Seeded random injection makes focused/unfocused decisions and simulations repeatable. Individual games can vary even though the fixed test batch shows lower average shots for higher levels.
+
+`Game.restartRound()` is allowed only after completion and rebuilds fresh fleets in the same mode and difficulty. `Game.advanceLevel()` requires a human victory against the computer below Level 3; it advances one difficulty and begins fresh fleet placement. These transitions clear shot history, readiness, winner, and strategy state. The opening picker still allows any starting level, so advancement proceeds from the selected level.
 
 ## Private local play
 
@@ -71,7 +74,7 @@ Every strategy samples only unshot cells and returns null after exhaustion. Seed
 
 `renderGame()` clears board children before showing the setup handoff panel, rather than hiding populated boards behind an overlay. This removes ship positions from the rendered page until the player acknowledges readiness. Accepted local shots never invoke the computer controller or open a handoff; rendering immediately selects the next participant's fleet and concealed opponent waters. Focus moves to placement controls after setup acknowledgement and to an available target after a battle turn switches.
 
-`index.js` remains the event coordinator. It delegates rules to `Game` and view selection to the renderers. `handoffPanel.css` is separate from the JavaScript component. Result dialogs, explicit end-of-round fleet reveal, and restart controls remain milestone 7.
+At completion, `getGameViewState()` selects the losing local player's perspective and exposes the winner's ships on the opponent board. In computer mode it keeps the human perspective and reveals the computer fleet only after a defeat. The `revealOpponentShips` flag is false throughout battle, and completed boards have no attackable cells. `ResultDialog` owns modal text and lifecycle; `index.js` connects its next-level callback and the completed-only Restart Round control to the guarded `Game` transitions. The dialog returns focus to the next available action when closed. Component styling remains in `src/styles/`.
 
 ## Manual placement
 

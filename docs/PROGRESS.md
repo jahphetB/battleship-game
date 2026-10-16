@@ -133,14 +133,26 @@ Verification:
 
 Environment note: an initial new-browser launch failed because the temporary disk was full. Older generated milestone 1/3/4 screenshots and their isolated test browsers were removed/closed; verification then completed using the cached CLI. Current milestone-5/6 artifacts were retained.
 
-## Remaining milestones
+## Milestone 7: Results and new rounds
 
-7. Add result dialogs, winner fleet reveal, level progression, and restart after round completion.
-8. Verify complete rounds, all modes/levels, responsive and keyboard behavior, and update documentation.
+Completed:
 
-The rule issues identified during inspection are resolved. Both play modes, both placement methods, and three computer difficulties are available; progression and end-of-round controls remain upcoming features.
+- Added guarded `restartRound()` and `advanceLevel()` transitions. Restart works only after completion and creates fresh fleets at the same mode/difficulty. Computer victories at Levels 1 and 2 can advance one level; defeats, local rounds, and Level 3 victories cannot.
+- Kept the opening level picker, allowing any starting difficulty. Next Level advances from that selected level; a Level 3 victory completes the sequence.
+- Added a themed result dialog with explicit winner/defeat text, a View Boards action, and a conditional Next Level action. Restart Round appears only after completion.
+- Revealed the computer fleet after a human defeat. Local completion selects the losing player's perspective and reveals the winner's fleet; no hidden ship positions appear during battle.
+- Preserved private local setup and automatic battle switching. Replays return to the appropriate placement phase with fresh boards and strategy state.
 
-Proposed campaign rule: start at level 1, unlock the next level after victory, retry the current level after defeat, and finish the campaign after level 3. Local human versus human uses standalone rounds.
+Verification:
+
+- Focused round-transition and view-state tests passed (2 suites / 9 tests); the production build passed.
+- Browser: a local Player 2 victory opened the dialog, revealed 17 winning ship cells, and exposed Restart only after completion. View Boards restored focus to Restart; replay returned to private Player 1 placement.
+- Browser: a Hard computer defeat revealed 17 computer ship cells, offered restart, and did not offer Next Level. An Easy victory offered Next Level and entered fresh Level 2 placement with the result dialog and restart control closed.
+- Browser console showed no application JavaScript errors; the pre-existing missing favicon request remains a 404.
+
+## Remaining milestone
+
+8. Check the complete cross-mode and cross-level flows, responsive and keyboard behavior, and update final documentation only where findings require it.
 
 Each milestone should have two or three meaningful commits, verified before pushing to GitHub. Report the outcome and wait for approval before starting the next milestone.
 

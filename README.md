@@ -15,7 +15,7 @@ A Battleship game built with JavaScript using Test Driven Development with Jest.
 - Validated placement and attacks; repeated shots do not consume a turn
 - Three computer difficulties with distinct search and pursuit strategies
 - Hit and miss tracking
-- Win/loss detection
+- Win/loss dialog, winning-fleet reveal, level advancement, and completed-round restart
 - Responsive naval-themed interface
 - Test-driven game logic with Jest
 
@@ -65,7 +65,7 @@ src/
   template.html            Page markup
   models/                  Ship, Gameboard, Player, and their tests
   game/                    Game orchestration, placement, computer strategies, and tests
-  components/              Board, status, private game view, handoff panel, and welcome dialog
+  components/              Board, status, game view, placement controls, and dialogs
   styles/                  Global and separate component styles
 ```
 
@@ -83,7 +83,7 @@ To place ships manually, use **Clear Fleet** or adjust the randomized layout. Se
 | 2: Medium | Pursues adjacent hits, infers ship direction, and searches alternating cells. |
 | 3: Hard | Scores possible remaining ship positions and pursues strong clues, with rare unfocused choices. |
 
-All levels avoid repeated shots and use only earned shot results. Choose any level before a round; win-to-advance progression and end-of-round controls are planned for milestone 7.
+All levels avoid repeated shots and use only earned shot results. You can choose any starting level before a round. A computer victory at Level 1 or 2 offers **Next Level** and starts fresh fleet placement at the following difficulty; a Level 3 victory completes the sequence. After any completed round, choose **View Boards** to inspect the result, then **Restart Round** to replay the same mode and difficulty with fresh fleets. A defeat reveals the computer's ships; a local victory shows the winner's fleet to the loser. Restart is unavailable during play.
 
 ## Collaboration workflow
 
