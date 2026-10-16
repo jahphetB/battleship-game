@@ -7,9 +7,10 @@ A Battleship game built with JavaScript using Test Driven Development with Jest.
 ## Features
 
 - Player vs. computer gameplay
-- Same-device human vs. human with private fleet setup and turn handoffs
+- Same-device human vs. human with private fleet setup and automatic battle turns
 - Themed opening rules briefing and opponent picker
 - Randomized ship placement for both fleets
+- Manual ship placement with mouse/touch dragging, rotation, and click/keyboard alternatives
 - Explicit fleet confirmation before battle
 - Validated placement and attacks; repeated shots do not consume a turn
 - Smarter computer AI that targets adjacent cells after a hit
@@ -73,6 +74,8 @@ See [Architecture](docs/ARCHITECTURE.md) for responsibilities and OOP/SOLID guid
 On startup, choose **Human vs computer** or **Human vs human**, then select **Deploy Fleet**. In computer mode, use **Randomize Ships** as desired, then **Start Battle**.
 
 In local two-player mode, Player 1 privately prepares and confirms their fleet, followed by Player 2. Battle starts immediately after Player 2 confirms. After each valid shot, the boards switch automatically to the next player's perspective. Readiness screens appear only during fleet setup.
+
+To place ships manually, use **Clear Fleet** or adjust the randomized layout. Select a ship in the tray, then drag it or choose its starting cell. **Orientation** or **R** changes its direction; arrow keys move focus around the grid, Enter/Space places the selected ship, and Escape cancels selection. Drag existing ships directly to reposition them. Green previews are valid; red previews indicate an overlap or an edge violation. All five ships must be placed before starting or confirming, and placement locks when battle starts.
 
 The briefing previews the three-level computer campaign, which will be implemented with difficulty strategies and progression in later milestones.
 

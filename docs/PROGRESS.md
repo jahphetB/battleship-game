@@ -81,16 +81,40 @@ Verification:
 - Keyboard arrows selected either mode; Tab/Shift+Tab wrapped through the selected radio and submit button. Keyboard confirmation routed to the appropriate local handoff or computer placement control.
 - A clean-load computer regression check reported zero application page errors: one human shot produced one computer response, all 17 human ship cells remained visible, enemy ships remained concealed, and no handoff appeared.
 
+## Milestone 4 follow-up: Automatic battle turns
+
+At the user's request, battle starts immediately after both fleets are confirmed and switches perspectives automatically after each accepted local shot. Readiness handoffs remain only during fleet setup. The original milestone-4 verification above describes the earlier behavior. Updated logic and view tests passed (73 tests), followed by the browser checks below.
+
+## Milestone 5: Manual ship placement
+
+Completed:
+
+- Preserved randomized fleets and added a five-ship tray, Clear Fleet, horizontal/vertical orientation, placement progress, and live feedback for both play modes.
+- Added stable fleet identities, including distinct Cruiser and Submarine slots. Randomized ships can be manually moved; clearing a fleet allows placement from scratch.
+- Added an injectable `ManualPlacement` service. Previews and mutations share `Gameboard` validation; movement excludes the selected ship from overlap checks, preserves its identity, and leaves invalid operations unchanged.
+- Added an OOP `PlacementControls` class with private pointer/keyboard helpers. It owns transient selection and gesture state, delegates legal operations to the game, and keeps CSS in a separate component stylesheet.
+- Added mouse/touch dragging from the tray or existing ship cells, valid/invalid previews, rotation that persists into a drag, and cancellation outside the board. Moving an existing ship preserves the grabbed segment.
+- Added click/tap placement, native Enter/Space activation, arrow-key navigation, R rotation, and Escape cancellation. Touch taps are resolved on pointer release to avoid missing or delayed browser compatibility clicks after dragging.
+- Blocked incomplete fleets from starting/confirming. Placement controls disappear and domain editing actions reject changes outside the active player's unconfirmed deployment.
+
+Verification:
+
+- 9 Jest suites / 84 tests pass; production build and `git diff --check` pass.
+- Rule tests cover two separate length-three ships, non-mutating previews, rotation and identity preservation, overlaps, edges, malformed input, randomized-ship editing, and phase/participant locks.
+- Desktop browser checks confirmed five-cell green drag previews, red overlap previews, invalid drops preserving the fleet, existing-ship moves, cancelled drags, keyboard placement, and rotation preserved while dragging.
+- A clean desktop check rotated a Carrier vertically, dragged it from the tray, then moved it directly from the board while a different ship was selected. The full 17-cell manual fleet started computer play; one human shot produced one computer response, with zero application page errors.
+- Chromium mobile touch emulation at 390 x 844 confirmed native touch dragging and a five-cell preview, immediate tap placement of the remaining ships, full manual setup for both local players, and no horizontal overflow.
+- Confirming the second local fleet immediately entered battle. Two opening shots switched Player 1 -> Player 2 -> Player 1 without handoff prompts, while preserving both fleets and recording one hit on each side.
+- A complete touch-controlled local round with two manually placed fleets ended in Player 1's victory after 33 valid shots. Every non-winning shot switched perspective automatically, no battle handoffs appeared, placement stayed hidden, and the winning shot left zero enabled targets. The browser reported zero application page errors.
+- Desktop and mobile placement artifacts were visually inspected. Browser touch emulation is not a physical-device field test.
+
 ## Remaining milestones
 
-Milestone 4 follow-up: at the user's request, battle now starts immediately after both fleets are confirmed and switches perspectives automatically after each accepted local shot. Readiness handoffs remain only during fleet setup. The original milestone-4 verification above describes the earlier behavior. Updated logic and view tests pass (73 tests).
-
-5. Add manual ship placement, rotation, drag feedback, and accessible placement alternatives.
 6. Introduce easy, medium, and hard computer strategies using only observed battle information.
 7. Add result dialogs, winner fleet reveal, level progression, and restart after round completion.
 8. Verify complete rounds, all modes/levels, responsive and keyboard behavior, and update documentation.
 
-The rule issues identified during inspection are resolved, and both play modes are available. Manual placement, difficulty strategies, and end-of-round controls remain upcoming features.
+The rule issues identified during inspection are resolved. Both play modes and both placement methods are available; difficulty strategies and end-of-round controls remain upcoming features.
 
 Proposed campaign rule: start at level 1, unlock the next level after victory, retry the current level after defeat, and finish the campaign after level 3. Local human versus human uses standalone rounds.
 
