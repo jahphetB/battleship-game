@@ -71,7 +71,10 @@ export default class Game {
     if (this.activePlayerIndex === 1 && !this.hasReadyFleets()) return false;
     this.readyPlayers[this.activePlayerIndex] = true;
     if (this.activePlayerIndex === 0) this.#beginHandoff(1, "placement");
-    else this.#beginHandoff(0, "battle");
+    else {
+      this.activePlayerIndex = 0;
+      this.phase = "battle";
+    }
     return true;
   }
 
@@ -130,8 +133,6 @@ export default class Game {
     if (defendingBoard.allShipsSunk()) {
       this.winnerIndex = this.activePlayerIndex;
       this.phase = "completed";
-    } else if (this.mode === "human") {
-      this.#beginHandoff(1 - this.activePlayerIndex, "battle");
     } else {
       this.activePlayerIndex = 1 - this.activePlayerIndex;
     }

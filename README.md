@@ -72,7 +72,7 @@ See [Architecture](docs/ARCHITECTURE.md) for responsibilities and OOP/SOLID guid
 
 On startup, choose **Human vs computer** or **Human vs human**, then select **Deploy Fleet**. In computer mode, use **Randomize Ships** as desired, then **Start Battle**.
 
-In local two-player mode, Player 1 privately randomizes and confirms their fleet, followed by Player 2. Pass the device back to Player 1 to begin. Each valid shot displays its result on a handoff screen; the next player selects their named Continue button before seeing their own fleet and the opponent's concealed waters. Both boards are removed from the page during handoffs. Look away while the other player prepares or takes their turn.
+In local two-player mode, Player 1 privately prepares and confirms their fleet, followed by Player 2. Battle starts immediately after Player 2 confirms. After each valid shot, the boards switch automatically to the next player's perspective. Readiness screens appear only during fleet setup.
 
 The briefing previews the three-level computer campaign, which will be implemented with difficulty strategies and progression in later milestones.
 

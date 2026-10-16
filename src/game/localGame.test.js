@@ -53,10 +53,8 @@ test("each player confirms privately before Player 1 can start firing", () => {
   expect(game.startBattle()).toBe(false);
   expect(game.confirmFleet()).toBe(true);
   expect(game.readyPlayers).toEqual([true, true]);
-  expect(game.phase).toBe("handoff");
-  expect(game.pendingPhase).toBe("battle");
-  expect(game.attack([0, 0]).accepted).toBe(false);
-  game.acknowledgeHandoff();
+  expect(game.pendingPhase).toBeNull();
+  expect(game.acknowledgeHandoff()).toBe(false);
   expect(game.phase).toBe("battle");
   expect(game.currentPlayer.name).toBe("Player 1");
   expect(game.randomizePlayerShips()).toBe(false);
@@ -75,22 +73,20 @@ test.each([0, 1])("player %s cannot confirm an incomplete fleet", index => {
   expect(game.readyPlayers[index]).toBe(false);
 });
 
-test("each accepted local shot requires a handoff and never triggers computer fire", () => {
+test("local shots switch perspectives automatically without computer fire or handoffs", () => {
   const game = readyLocalGame();
   expect(game.attack([9, 9]).accepted).toBe(true);
-  expect(game.phase).toBe("handoff");
+  expect(game.phase).toBe("battle");
+  expect(game.pendingPhase).toBeNull();
   expect(game.currentPlayer.name).toBe("Player 2");
   expect(game.players[1].gameboard.missedAttacks).toEqual([[9, 9]]);
-  expect(game.lastShot).toEqual({ playerIndex: 0, coordinates: [9, 9], hit: false, sunk: false });
   expect(game.players[0].gameboard.missedAttacks).toEqual([]);
-  expect(game.attack([8, 9]).accepted).toBe(false);
   expect(game.computerAttack().accepted).toBe(false);
-  expect(game.confirmFleet()).toBe(false);
+  expect(game.acknowledgeHandoff()).toBe(false);
   expect(game.randomizePlayerShips()).toBe(false);
-  game.acknowledgeHandoff();
   expect(game.attack([9, 9]).accepted).toBe(true);
   expect(game.players[0].gameboard.missedAttacks).toEqual([[9, 9]]);
-  expect(game.phase).toBe("handoff");
+  expect(game.phase).toBe("battle");
   expect(game.activePlayerIndex).toBe(0);
   expect(game.lastShot.playerIndex).toBe(1);
 });

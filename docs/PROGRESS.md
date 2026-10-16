@@ -83,6 +83,8 @@ Verification:
 
 ## Remaining milestones
 
+Milestone 4 follow-up: at the user's request, battle now starts immediately after both fleets are confirmed and switches perspectives automatically after each accepted local shot. Readiness handoffs remain only during fleet setup. The original milestone-4 verification above describes the earlier behavior. Updated logic and view tests pass (73 tests).
+
 5. Add manual ship placement, rotation, drag feedback, and accessible placement alternatives.
 6. Introduce easy, medium, and hard computer strategies using only observed battle information.
 7. Add result dialogs, winner fleet reveal, level progression, and restart after round completion.

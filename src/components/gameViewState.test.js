@@ -5,14 +5,14 @@ test("setup and every handoff supply no boards to the renderer", () => {
   const game = new Game();
   expect(getGameViewState(game)).toMatchObject({ ownBoard: null, opponentBoard: null, canAttack: false });
   game.setupGame({ mode: "human" });
-  for (let handoff = 0; handoff < 3; handoff += 1) {
+  for (let handoff = 0; handoff < 2; handoff += 1) {
     expect(game.phase).toBe("handoff");
     expect(getGameViewState(game)).toMatchObject({ ownBoard: null, opponentBoard: null, canAttack: false });
     game.acknowledgeHandoff();
     if (game.phase === "placement") game.confirmFleet();
   }
-  game.attack([9, 9]);
-  expect(getGameViewState(game)).toMatchObject({ ownBoard: null, opponentBoard: null, canAttack: false });
+  expect(game.phase).toBe("battle");
+  expect(getGameViewState(game).ownBoard).toBe(game.players[0].gameboard);
 });
 
 test("local placement exposes only the current player's board", () => {
@@ -29,7 +29,7 @@ test("local placement exposes only the current player's board", () => {
   });
 });
 
-test("local battle perspectives alternate only after handoff acknowledgement", () => {
+test("local battle perspectives alternate immediately after accepted shots", () => {
   const game = new Game();
   game.setupGame({ mode: "human" });
   game.acknowledgeHandoff();
@@ -41,8 +41,8 @@ test("local battle perspectives alternate only after handoff acknowledgement", (
     ownBoard: game.players[0].gameboard, opponentBoard: game.players[1].gameboard, canAttack: true,
   });
   game.attack([9, 9]);
-  expect(getGameViewState(game).ownBoard).toBeNull();
-  game.acknowledgeHandoff();
+  expect(game.phase).toBe("battle");
+  expect(game.acknowledgeHandoff()).toBe(false);
   expect(getGameViewState(game)).toMatchObject({
     ownBoard: game.players[1].gameboard, opponentBoard: game.players[0].gameboard,
     ownTitle: "Player 2's Fleet", opponentTitle: "Player 1's Waters", canAttack: true,
