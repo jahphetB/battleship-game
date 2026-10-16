@@ -108,16 +108,40 @@ Verification:
 - A complete touch-controlled local round with two manually placed fleets ended in Player 1's victory after 33 valid shots. Every non-winning shot switched perspective automatically, no battle handoffs appeared, placement stayed hidden, and the winning shot left zero enabled targets. The browser reported zero application page errors.
 - Desktop and mobile placement artifacts were visually inspected. Browser touch emulation is not a physical-device field test.
 
+## Milestone 6: Computer difficulty strategies
+
+Completed:
+
+- Added Easy, Medium, and Hard strategy classes with the common `nextAttack()` / `recordResult()` contract, shared earned-observation memory, and an injected random source.
+- Removed attack-search and target-queue logic from `Game`. It now receives a strategy factory, creates a fresh strategy during computer setup, and delegates decisions without passing a board to the strategy.
+- Added cloned sunk-ship length/coordinates to the board's final-hit result. Every cell of that ship has already been hit; no unshot ship placement is disclosed to the strategy.
+- Easy usually searches randomly and follows available adjacent clues 35% of the time. Medium prioritizes aligned hit runs, adjacent targets, and alternating search cells. Hard scores possible remaining ship placements and makes an unfocused legal choice on 3% of turns.
+- Added a themed three-level picker to the opening dialog, Easy selected by default, and a persistent selected-level label above the boards. Difficulty is validated and locked after setup. Local mode hides/disables the picker and creates no strategy.
+- Kept local automatic battle turns and both fleet-placement methods intact. Win-to-advance progression and end-of-round controls remain milestone 7.
+- Updated the workflow to require two or three focused commits per milestone.
+
+Verification:
+
+- 11 Jest suites / 109 tests pass; production build and `git diff --check` pass.
+- Strategy tests cover unique in-bounds shots, exhaustion, easy/unfocused branches, adjacent pursuit, horizontal and vertical direction inference, missed ends, sunk-target cleanup, touching ships, separate length-three fleet slots, and protected memory snapshots.
+- Integration tests cover all level keys, invalid configuration, locked setup, local strategy isolation, rejected choices, and the exact observation-only interface. `nextAttack()` receives no arguments; `recordResult()` receives only the accepted shot's earned result.
+- A deterministic comparison replayed the same 30 seeded layouts per strategy, with every fleet sunk within 100 unique legal shots. Mean shots: Easy 73.77, Medium 52.13, Hard 48.20. These describe that fixture batch; individual games vary and Hard is not an optimal solver.
+- Complete desktop browser rounds passed at all three difficulties with zero application page errors. Easy, Medium, and Hard rounds ended after 60, 41, and 60 exchanges respectively; each preserved its level label, concealed enemy ships, and left zero enabled targets. These independently randomized rounds are not a controlled difficulty comparison.
+- Desktop and 390 x 844 mobile selector layouts were visually inspected. The mobile dialog had equal content/client widths (336 px), with vertically stacked choices and no horizontal overflow.
+- Keyboard arrows selected Hard, Tab/Shift+Tab wrapped through available groups and submission, local selection hid/disabled difficulty inputs, and returning to computer mode restored Hard and applied it to the round.
+- Local browser regression confirmed two accepted shots automatically switched Player 1 -> Player 2 -> Player 1 with no battle handoff and a Local two-player label.
+
+Environment note: an initial new-browser launch failed because the temporary disk was full. Older generated milestone 1/3/4 screenshots and their isolated test browsers were removed/closed; verification then completed using the cached CLI. Current milestone-5/6 artifacts were retained.
+
 ## Remaining milestones
 
-6. Introduce easy, medium, and hard computer strategies using only observed battle information.
 7. Add result dialogs, winner fleet reveal, level progression, and restart after round completion.
 8. Verify complete rounds, all modes/levels, responsive and keyboard behavior, and update documentation.
 
-The rule issues identified during inspection are resolved. Both play modes and both placement methods are available; difficulty strategies and end-of-round controls remain upcoming features.
+The rule issues identified during inspection are resolved. Both play modes, both placement methods, and three computer difficulties are available; progression and end-of-round controls remain upcoming features.
 
 Proposed campaign rule: start at level 1, unlock the next level after victory, retry the current level after defeat, and finish the campaign after level 3. Local human versus human uses standalone rounds.
 
-Each milestone should have at least two or three meaningful commits, verified before pushing to GitHub. Report the outcome and wait for approval before starting the next milestone.
+Each milestone should have two or three meaningful commits, verified before pushing to GitHub. Report the outcome and wait for approval before starting the next milestone.
 
 For this project only, the user has authorized committing and pushing verified work without separate approval.

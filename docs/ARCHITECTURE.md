@@ -9,10 +9,14 @@ This is a vanilla JavaScript application using Webpack and Jest. Preserve the ex
 | `models/ship.js` | Store ship length and damage; determine whether it is sunk. | None |
 | `models/gameboard.js` | Own ships and attack history; validate placement and resolve attacks. | `Ship` |
 | `models/player.js` | Represent a named human/computer participant and own their board. | `Gameboard` |
-| `game/game.js` | Coordinate participants, turns, setup, handoffs, and game completion. | `Player`, injected `FleetPlacement` and `ManualPlacement` |
+| `game/game.js` | Coordinate participants, turns, setup, handoffs, and game completion. | `Player`, injected placement services and strategy factory |
 | `game/fleet.js` | Define the five fleet identities, names, and lengths. | None |
 | `game/fleetPlacement.js` | Generate fresh complete fleets using legal candidate placements. | `Gameboard` and an injected random function |
 | `game/manualPlacement.js` | Preview and apply a single ship's placement or movement. | Fleet definitions and supplied `Gameboard` |
+| `game/computer/attackMemory.js` | Store earned shot states and remaining ship lengths. | Board size and fleet lengths; no board instance |
+| `game/computer/computerStrategy.js` | Provide shared observation, legal sampling, and pursuit helpers. | `AttackMemory` and injected random source |
+| `game/computer/easyStrategy.js`, `mediumStrategy.js`, `hardStrategy.js` | Choose attacks using the selected difficulty's search/pursuit policy. | Shared strategy contract and observation memory |
+| `game/computer/createComputerStrategy.js` | Validate difficulty keys and create a fresh strategy. | Concrete strategies |
 | `components/board.js` | Render one supplied board, including coordinates and shot markers. | Supplied board and DOM container |
 | `components/status.js` | Render the current status into a supplied DOM element. | Supplied game and status element |
 | `components/gameView.js` | Connect game state to the page's board, status, and randomize controls. | Board/status renderers and page elements |
@@ -29,15 +33,15 @@ The dependency flow is `index -> game -> models` and `index -> gameView -> rende
 - Keep state and behavior together in `Ship`, `Gameboard`, `Player`, and `Game`. Prefer composition: a player has a board, and a board has ships. An inheritance hierarchy is not needed for these relationships.
 - Apply the single responsibility principle by keeping rendering outside game rules and separating board rendering from page coordination and status rendering.
 - Keep small rendering functions where no persistent UI state is needed. Add a class when it owns meaningful state and behavior, rather than wrapping every function in a class.
-- As difficulty levels arrive, extract computer targeting behind a small strategy contract. The game should coordinate a supplied strategy rather than accumulate difficulty-specific branches.
+- Computer targeting uses the Strategy pattern: each level implements `nextAttack()` and `recordResult()`. The game coordinates a strategy created by an injected factory, without difficulty-specific attack branches.
 - Random and manual placement share `Gameboard` validation. Each placement service has a focused responsibility; the controller delegates legality and phase checks to the game.
 - Introduce only the contracts needed by an approved feature. The current refactor establishes boundaries; it does not claim to finish every SOLID improvement.
 
-`Game` receives a fleet generator through its constructor. It owns a participant array, active participant index, per-player fleet readiness, winner index, and the last accepted shot. Its `currentPlayer`, `opponent`, and `winner` getters expose participant identities without tying turn logic to human/computer-specific field names. Both modes use the same board validation and turn completion logic. The existing adjacent computer targeting remains in `Game` until the difficulty milestone.
+`Game` receives placement services, a strategy factory, and a random source through its constructor. It owns a participant array, active participant index, per-player fleet readiness, winner index, and the last accepted shot. Its `currentPlayer`, `opponent`, and `winner` getters expose participant identities without tying turn logic to human/computer-specific field names. Both modes use the same board validation and turn completion logic. Search and pursuit state belongs to the selected computer strategy rather than `Game`.
 
 Computer flow is `setup -> placement -> battle -> completed`. Local flow is `setup -> handoff -> Player 1 placement -> handoff -> Player 2 placement -> battle`. Readiness handoffs are limited to fleet setup. Once both fleets are confirmed, battle begins as Player 1; every non-winning accepted shot immediately switches the active participant and board perspective. There are no battle turn prompts. No attacks, placement changes, or fleet confirmation are accepted during a setup handoff. Confirmed local fleets are locked; neither player can edit the other's board. A winning shot completes the round immediately.
 
-Handoff creation, turn completion, shot recording, and adjacent-target queueing are private class methods. Callers use the public game actions rather than directly invoking internal transitions.
+Handoff creation, turn completion, and shot recording are private class methods. Callers use the public game actions rather than directly invoking internal transitions.
 
 `Gameboard.receiveAttack()` returns an explicit accepted/rejected outcome, including hit and sunk information for accepted shots. Only accepted attacks advance the turn. Board validation checks integer bounds, coordinate count, straight alignment, contiguity, uniqueness, and overlap. Stored coordinates are copied so caller mutations cannot alter the board accidentally.
 
@@ -45,7 +49,21 @@ Fleet generation samples legal placements rather than retrying random positions 
 
 Startup renders an empty setup state, then opens the native welcome dialog. Only confirmation through its injected callback configures the game and generates fleets. `WelcomeDialog` has no dependency on `Game`; `index.js` connects the two. Unsupported modes leave game state untouched. Both computer and local human-versus-human modes are available.
 
-The modal uses native background blocking, labelled content, initial heading focus, explicit Tab/Shift+Tab wrapping through the selected radio and submit control, and an injected focus callback after confirmation. Escape cannot skip required setup. Its rules describe current play; the planned three-level campaign is clearly marked as upcoming. `dialogs.css` owns its appearance and scrollable viewport bounds.
+The modal uses native background blocking, labelled content, initial heading focus, explicit Tab/Shift+Tab wrapping through selected radio groups and the submit control, and an injected focus callback after confirmation. Escape cannot skip required setup. The difficulty fieldset is visible/enabled only for computer mode. `dialogs.css` owns its appearance and scrollable viewport bounds.
+
+## Computer difficulty and information boundaries
+
+The game validates Easy/Medium/Hard during setup, creates a fresh strategy, and locks configuration once deployment begins. Easy is the default. Local mode has no computer strategy or difficulty, regardless of the hidden form selection.
+
+`nextAttack()` receives no arguments. After an accepted computer attack, the game calls `recordResult(coordinate, outcome)` with only hit/sunk observations. On a sinking hit, `Gameboard` additionally returns cloned coordinates and length for that fully hit ship. No unhit position, fleet layout, ship object, board reference, or human placement history is passed to a strategy.
+
+`AttackMemory` keeps private shot states and a multiset of remaining lengths. Sinking a length-three ship removes one occurrence, preserving the other. Sunk cells are excluded from further placement scoring, while unrelated hits (including touching ships) stay unresolved. Snapshot getters return fresh arrays.
+
+- Easy follows adjacent clues 35% of the time when available; otherwise it samples any unshot cell.
+- Medium prioritizes unshot ends of contiguous aligned hits, then adjacent cells, then alternating search cells. It falls back to other legal cells once needed.
+- Hard enumerates remaining ship placements consistent with observed misses and sunk cells, prioritizes placements covering the most unresolved hits, and scores their unshot cells. It randomly breaks equal scores and uses an unfocused legal choice on 3% of decisions. This is a placement-scoring heuristic, not a guarantee of optimal play or a 97% hit rate.
+
+Every strategy samples only unshot cells and returns null after exhaustion. Seeded random injection makes focused/unfocused decisions and simulations repeatable. Individual games can vary even though the fixed test batch shows lower average shots for higher levels. Win-to-advance progression and next-level/restart controls remain milestone 7.
 
 ## Private local play
 
