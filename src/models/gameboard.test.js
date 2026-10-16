@@ -134,7 +134,10 @@ test("returns hit and sunk outcomes without double counting", () => {
   const board = new Gameboard();
   const ship = board.placeShip(2, [[0, 0], [1, 0]]);
   expect(board.receiveAttack([0, 0])).toEqual({ accepted: true, hit: true, sunk: false });
-  expect(board.receiveAttack([1, 0])).toEqual({ accepted: true, hit: true, sunk: true });
+  const result = board.receiveAttack([1, 0]);
+  expect(result).toEqual({ accepted: true, hit: true, sunk: true, sunkShip: { length: 2, coordinates: [[0, 0], [1, 0]] } });
+  result.sunkShip.coordinates[0][0] = 9;
+  expect(board.ships[0].coordinates).toEqual([[0, 0], [1, 0]]);
   expect(board.receiveAttack([0, 0])).toEqual({ accepted: false });
   expect(ship.hits).toBe(2);
 });

@@ -57,7 +57,11 @@ export default class Gameboard {
     if (target) {
       target.ship.hit();
       this.successfulAttacks.push([...coordinates]);
-      return { accepted: true, hit: true, sunk: target.ship.isSunk() };
+      const sunk = target.ship.isSunk();
+      return {
+        accepted: true, hit: true, sunk,
+        ...(sunk ? { sunkShip: { length: target.ship.length, coordinates: target.coordinates.map(cell => [...cell]) } } : {}),
+      };
     }
     this.missedAttacks.push([...coordinates]);
     return { accepted: true, hit: false, sunk: false };
