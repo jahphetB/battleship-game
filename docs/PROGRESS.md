@@ -37,9 +37,29 @@ Completed:
 
 Verification: 5 Jest suites / 50 tests pass; production build passes. Browser checks confirmed zero attackable cells during placement, a complete visible human fleet, explicit Start Battle, one computer response per accepted human shot, disabled repeated targets, and locked setup controls during battle. Unit tests cover either winner, incomplete fleets, malformed placement/attacks, phase guards, and deterministic fleet generation. A multiplayer handoff phase belongs to milestone 4, when that behavior exists.
 
+## Milestone 3: Welcome briefing and mode selection
+
+Completed:
+
+- Added a native opening modal matching the naval palette, typography, controls, and panel styling.
+- Added concise fleet, placement, attack, and victory rules plus a clearly labelled preview of Easy / Medium / Hard.
+- Added an opponent picker: computer play is available; human-versus-human is disabled and labelled Coming soon until milestone 4.
+- Added an OOP `WelcomeDialog` controller with an injected configuration callback. The game stays in setup with empty boards until confirmation, then enters placement rather than starting battle automatically.
+- Added initial heading focus, modal background blocking, Escape protection, forward/reverse focus wrapping, and focus restoration after confirmation.
+- Added round-status regression tests. A build caught a status-text syntax error during implementation; it was corrected before final verification.
+
+Verification:
+
+- 6 Jest suites / 57 tests pass; production build and `git diff --check` pass.
+- Clean browser reload reported zero application page errors. Desktop briefing verified at 1440 x 1000, with the full dialog and Deploy Fleet visible.
+- Mobile briefing verified at 390 x 844: no horizontal dialog overflow, vertical scrolling available, and keyboard-accessible confirmation reachable.
+- Before confirmation: empty fleets, no attackable cells, randomization disabled, and initial focus on the dialog heading.
+- Escape leaves the dialog open; Tab and Shift+Tab wrap through available controls and skip the disabled mode.
+- Keyboard confirmation closes the dialog, restores focus to Randomize Ships, creates a 17-cell human fleet, conceals computer ships, and keeps attacks blocked until Start Battle.
+- A complete browser round reached defeat after 71 human shots and 71 computer shots, then disabled all targets and kept setup controls locked. Both winner outcomes are also covered by logic tests.
+
 ## Remaining milestones
 
-3. Add a themed opening rules dialog and mode selection.
 4. Add private setup and turn handoffs for same-device human versus human.
 5. Add manual ship placement, rotation, drag feedback, and accessible placement alternatives.
 6. Introduce easy, medium, and hard computer strategies using only observed battle information.

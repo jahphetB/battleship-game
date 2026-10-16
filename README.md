@@ -7,7 +7,10 @@ A Battleship game built with JavaScript using Test Driven Development with Jest.
 ## Features
 
 - Player vs. computer gameplay
-- Randomized ship placement
+- Themed opening rules briefing and opponent picker
+- Randomized ship placement for both fleets
+- Explicit fleet confirmation before battle
+- Validated placement and attacks; repeated shots do not consume a turn
 - Smarter computer AI that targets adjacent cells after a hit
 - Hit and miss tracking
 - Win/loss detection
@@ -60,11 +63,13 @@ src/
   template.html            Page markup
   models/                  Ship, Gameboard, Player, and their tests
   game/                    Game orchestration and its tests
-  components/              Board, status, and game view renderers
-  styles/                  Global, command panel, and board styles
+  components/              Board, status, game view, and welcome dialog
+  styles/                  Global, command panel, board, and dialog styles
 ```
 
 See [Architecture](docs/ARCHITECTURE.md) for responsibilities and OOP/SOLID guidelines, and [Progress](docs/PROGRESS.md) for the feature roadmap and milestone checks.
+
+On startup, read the briefing and select **Deploy Fleet**. Use **Randomize Ships** as desired, then **Start Battle**. The opponent picker currently enables computer play; local two-player play is planned for milestone 4. The briefing previews the three-level campaign, which will be implemented with difficulty strategies and progression in later milestones.
 
 ## Collaboration workflow
 

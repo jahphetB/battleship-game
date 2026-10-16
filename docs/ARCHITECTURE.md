@@ -14,6 +14,7 @@ This is a vanilla JavaScript application using Webpack and Jest. Preserve the ex
 | `components/board.js` | Render one supplied board, including coordinates and shot markers. | Supplied board and DOM container |
 | `components/status.js` | Render the current status into a supplied DOM element. | Supplied game and status element |
 | `components/gameView.js` | Connect game state to the page's board, status, and randomize controls. | Board/status renderers and page elements |
+| `components/welcomeDialog.js` | Own modal lifecycle, mode form submission, focus wrapping, and focus restoration. | Supplied dialog, configuration callback, and focus target |
 | `index.js` | Create the game, initialize it, import styles, and connect user events. | `Game`, game view, styles |
 
 The dependency flow is `index -> game -> models` and `index -> gameView -> renderers`. Models and game logic must not import browser rendering code or query the DOM.
@@ -32,6 +33,10 @@ The dependency flow is `index -> game -> models` and `index -> gameView -> rende
 `Gameboard.receiveAttack()` returns an explicit accepted/rejected outcome, including hit and sunk information for accepted shots. Only accepted attacks advance the turn. Board validation checks integer bounds, coordinate count, straight alignment, contiguity, uniqueness, and overlap. Stored coordinates are copied so caller mutations cannot alter the board accidentally.
 
 Fleet generation samples legal placements rather than retrying random positions indefinitely. The injected random source makes placement and attack tests repeatable. Starting battle requires the complete fleet `[5, 4, 3, 3, 2]` on both boards; setup and completed rounds reject attacks, and battle/completed rounds reject randomization.
+
+Startup renders an empty setup state, then opens the native welcome dialog. Only confirmation through its injected callback configures the game and generates fleets. `WelcomeDialog` has no dependency on `Game`; `index.js` connects the two. Unsupported modes leave game state untouched. Local human-versus-human is visibly unavailable until its private setup and handoff behavior is implemented.
+
+The modal uses native background blocking, labelled content, initial heading focus, explicit Tab/Shift+Tab wrapping, and focus restoration to Randomize Ships after confirmation. Escape cannot skip required setup. Its rules describe current play; the planned three-level campaign is clearly marked as upcoming. `dialogs.css` owns its appearance and scrollable viewport bounds.
 
 ## Styles and tests
 
