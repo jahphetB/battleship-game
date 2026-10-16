@@ -6,6 +6,50 @@
     <title>Battleship</title>
 </head>
 <body>
+    <dialog id="welcome-dialog" class="briefing-dialog" aria-labelledby="briefing-title" aria-describedby="briefing-description">
+        <form class="briefing-form">
+            <header>
+                <p class="eyebrow">Naval Command / Mission Briefing</p>
+                <h2 id="briefing-title" tabindex="-1" autofocus>Welcome aboard, Commander.</h2>
+                <p id="briefing-description">Find the enemy fleet before they find yours.</p>
+            </header>
+
+            <section aria-labelledby="rules-title">
+                <h3 id="rules-title">Your orders</h3>
+                <ol class="briefing-rules">
+                    <li>Command five ships (lengths 5, 4, 3, 3, 2) on a 10 × 10 grid.</li>
+                    <li>Randomize your fleet, then select Start Battle.</li>
+                    <li>Take turns firing one shot. Hits and misses stay marked; you cannot fire at the same cell twice.</li>
+                    <li>Sink every enemy ship to win. Enemy positions stay hidden during battle.</li>
+                </ol>
+            </section>
+
+            <section class="campaign-preview" aria-labelledby="campaign-title">
+                <h3 id="campaign-title">Three levels ahead</h3>
+                <ol class="campaign-levels" aria-label="Planned computer campaign">
+                    <li><span>01</span> Easy</li>
+                    <li><span>02</span> Medium</li>
+                    <li><span>03</span> Hard</li>
+                </ol>
+                <p class="briefing-note">The three-level campaign is coming soon. Today, take on our standard computer opponent.</p>
+            </section>
+
+            <fieldset class="mode-picker">
+                <legend>Choose your opponent</legend>
+                <label class="mode-option">
+                    <input type="radio" name="mode" value="computer" checked>
+                    <span><strong>Human vs computer</strong><span class="mode-detail">You command your fleet. The computer returns fire.</span></span>
+                </label>
+                <label class="mode-option mode-option-unavailable">
+                    <input type="radio" name="mode" value="human" disabled aria-describedby="local-mode-note">
+                    <span><strong>Human vs human <span class="mode-badge">Coming soon</span></strong><span id="local-mode-note" class="mode-detail">Two commanders, one device, private alternating turns.</span></span>
+                </label>
+            </fieldset>
+
+            <p class="briefing-error" role="alert"></p>
+            <button class="command-button briefing-submit" type="submit">Deploy Fleet</button>
+        </form>
+    </dialog>
     <main>
         <header class="battlefield-header">
             <p class="eyebrow">Naval Command</p>
