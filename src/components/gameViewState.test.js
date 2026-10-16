@@ -64,5 +64,30 @@ test("computer turns and defeats retain the human board perspective", () => {
   game.computerStrategy = { nextAttack: () => last, recordResult: jest.fn() };
   game.computerAttack();
   expect(game.winnerIndex).toBe(1);
-  expect(getGameViewState(game).ownBoard).toBe(game.players[0].gameboard);
+  expect(getGameViewState(game)).toMatchObject({
+    ownBoard: game.players[0].gameboard, opponentBoard: game.players[1].gameboard,
+    opponentTitle: "Computer Fleet Revealed", revealOpponentShips: true, canAttack: false,
+  });
+});
+
+test.each([0, 1])("local completion shows winner %s's fleet to the loser", winnerIndex => {
+  const game = new Game();
+  game.setupGame({ mode: "human" });
+  game.acknowledgeHandoff();
+  game.confirmFleet();
+  game.acknowledgeHandoff();
+  game.confirmFleet();
+  if (winnerIndex === 1) game.attack([9, 9]);
+  const defender = game.opponent.gameboard;
+  const cells = defender.ships.flatMap(ship => ship.coordinates);
+  const last = cells.pop();
+  cells.forEach(cell => defender.receiveAttack(cell));
+  game.attack(last);
+  expect(getGameViewState(game)).toMatchObject({
+    ownBoard: game.players[1 - winnerIndex].gameboard,
+    opponentBoard: game.players[winnerIndex].gameboard,
+    ownTitle: `Player ${2 - winnerIndex}'s Fleet`,
+    opponentTitle: `Player ${winnerIndex + 1}'s Fleet`,
+    revealOpponentShips: true, canAttack: false,
+  });
 });

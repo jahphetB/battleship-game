@@ -50,6 +50,33 @@ export default class Game {
     return true;
   }
 
+  restartRound() {
+    if (this.phase !== "completed") return false;
+    const { mode, difficulty } = this;
+    this.#resetRound();
+    return this.setupGame({ mode, difficulty });
+  }
+
+  advanceLevel() {
+    const nextLevel = DIFFICULTIES.indexOf(this.difficulty) + 1;
+    if (this.phase !== "completed" || this.mode !== "computer" ||
+        this.winnerIndex !== 0 || nextLevel >= DIFFICULTIES.length) return false;
+    this.#resetRound();
+    return this.setupGame({ mode: "computer", difficulty: DIFFICULTIES[nextLevel] });
+  }
+
+  #resetRound() {
+    this.phase = "setup";
+    this.activePlayerIndex = 0;
+    this.readyPlayers = [false, false];
+    this.pendingPhase = null;
+    this.winnerIndex = null;
+    this.lastShot = null;
+    this.computerStrategy = null;
+    this.difficulty = null;
+    this.mode = null;
+  }
+
   canRandomizeShips(playerIndex = this.activePlayerIndex) {
     return this.phase === "placement" && [0, 1].includes(playerIndex) &&
       !this.readyPlayers[playerIndex] && (this.mode === "computer" || playerIndex === this.activePlayerIndex);

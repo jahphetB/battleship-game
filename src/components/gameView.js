@@ -16,7 +16,9 @@ export function renderGame(game, placementControls) {
   // Clear private cells before displaying the pass-device screen.
   if (state.ownBoard) renderBoard(state.ownBoard, ownBoard, { showShips: true, interactive: game.canRandomizeShips() });
   else ownBoard.replaceChildren();
-  if (state.opponentBoard) renderBoard(state.opponentBoard, opponentBoard, { interactive: state.canAttack });
+  if (state.opponentBoard) renderBoard(state.opponentBoard, opponentBoard, {
+    showShips: state.revealOpponentShips, interactive: state.canAttack,
+  });
   else opponentBoard.replaceChildren();
   document.querySelector("#boards").hidden = !state.ownBoard;
   document.querySelector("#opponent-section").hidden = !state.opponentBoard;
