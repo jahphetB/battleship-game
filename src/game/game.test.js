@@ -1,161 +1,114 @@
 import Game from "./game.js";
+import FleetPlacement from "./fleetPlacement.js";
 
-test("game starts with the real player's turn", () => {
-	const game = new Game();
+function readyGame() {
+  const game = new Game({ fleetPlacement: new FleetPlacement(() => 0), random: () => 0 });
+  game.setupGame();
+  game.startBattle();
+  return game;
+}
 
-	expect(game.currentTurn).toBe("real");
+test("starts in setup with independent human and computer participants", () => {
+  const game = new Game();
+  expect(game.phase).toBe("setup");
+  expect(game.realPlayer.type).toBe("real");
+  expect(game.computerPlayer.type).toBe("computer");
+  expect(game.realPlayer.gameboard).not.toBe(game.computerPlayer.gameboard);
+  expect(game.attack([0, 0])).toEqual({ accepted: false });
+  expect(game.startBattle()).toBe(false);
+  expect(game.randomizePlayerShips()).toBe(false);
 });
 
-test("game contains a real player and a computer player", () => {
-	const game = new Game();
-
-	expect(game.realPlayer.type).toBe("real");
-	expect(game.computerPlayer.type).toBe("computer");
+test("setup gives both players full randomized fleets and requires explicit start", () => {
+  const game = new Game();
+  expect(game.setupGame()).toBe(true);
+  expect(game.phase).toBe("placement");
+  for (const player of [game.realPlayer, game.computerPlayer]) expect(player.gameboard.ships).toHaveLength(5);
+  expect(game.attack([0, 0]).accepted).toBe(false);
+  expect(game.computerAttack().accepted).toBe(false);
+  expect(game.setupGame()).toBe(false);
+  expect(game.startBattle()).toBe(true);
+  expect(game.phase).toBe("battle");
+  expect(game.currentTurn).toBe("real");
 });
 
-test("real player can attack the computer gameboard", () => {
-	const game = new Game();
-
-	const ship = game.computerPlayer.gameboard.placeShip(1, [[0, 0]]);
-
-	game.attack([0, 0]);
-
-	expect(ship.hits).toBe(1);
+test.each(["real", "computer"])("can randomize %s during placement only", type => {
+  const game = new Game();
+  game.setupGame();
+  const player = type === "real" ? game.realPlayer : game.computerPlayer;
+  const original = player.gameboard;
+  expect(game.randomizePlayerShips(type)).toBe(true);
+  expect(player.gameboard).not.toBe(original);
+  expect(player.gameboard.ships).toHaveLength(5);
+  game.startBattle();
+  const ready = player.gameboard;
+  expect(game.randomizePlayerShips(type)).toBe(false);
+  expect(player.gameboard).toBe(ready);
 });
 
-test("turn switches to computer after the real player attacks", () => {
-	const game = new Game();
-
-	game.attack([0, 0]);
-
-	expect(game.currentTurn).toBe("computer");
+test("rejects an unknown player and an incomplete or incorrect fleet", () => {
+  const game = new Game();
+  game.setupGame();
+  expect(game.randomizePlayerShips("other")).toBe(false);
+  game.realPlayer.gameboard.ships.pop();
+  expect(game.startBattle()).toBe(false);
+  game.realPlayer.gameboard.placeShip(1, [[9, 9]]);
+  expect(game.startBattle()).toBe(false);
+  expect(game.phase).toBe("placement");
 });
 
-test("computer can attack the real player's gameboard", () => {
-	const game = new Game();
-
-	const ship = game.realPlayer.gameboard.placeShip(1, [[0, 0]]);
-
-	jest.spyOn(Math, "random").mockReturnValue(0);
-
-	game.currentTurn = "computer";
-	game.computerAttack();
-
-	expect(ship.hits).toBe(1);
-
-	Math.random.mockRestore();
+test("accepted attacks alternate turns; invalid and repeated shots do not", () => {
+  const game = readyGame();
+  expect(game.attack([10, 0]).accepted).toBe(false);
+  expect(game.currentTurn).toBe("real");
+  expect(game.attack([9, 9]).accepted).toBe(true);
+  expect(game.currentTurn).toBe("computer");
+  expect(game.attack([8, 9]).accepted).toBe(false);
+  expect(game.computerAttack().accepted).toBe(true);
+  expect(game.currentTurn).toBe("real");
+  expect(game.attack([9, 9]).accepted).toBe(false);
+  expect(game.currentTurn).toBe("real");
+  expect(game.computerAttack().accepted).toBe(false);
+  expect(game.computerPlayer.gameboard.missedAttacks).toEqual([[9, 9]]);
 });
 
-test("turn switches back to real player after computer attacks", () => {
-	const game = new Game();
-
-	jest.spyOn(Math, "random").mockReturnValue(0);
-
-	game.currentTurn = "computer";
-	game.computerAttack();
-
-	expect(game.currentTurn).toBe("real");
-
-	Math.random.mockRestore();
+test("duplicate hits do not damage ships or consume the turn", () => {
+  const game = readyGame();
+  game.attack([0, 0]);
+  game.computerAttack();
+  expect(game.attack([0, 0]).accepted).toBe(false);
+  expect(game.currentTurn).toBe("real");
+  expect(game.computerPlayer.gameboard.ships[0].ship.hits).toBe(1);
 });
 
-test("computer does not attack the same coordinate twice", () => {
-	const game = new Game();
-
-	jest
-		.spyOn(Math, "random")
-		.mockReturnValueOnce(0)
-		.mockReturnValueOnce(0)
-		.mockReturnValueOnce(0)
-		.mockReturnValueOnce(0)
-		.mockReturnValueOnce(0.1)
-		.mockReturnValueOnce(0.1);
-
-	game.currentTurn = "computer";
-	game.computerAttack();
-
-	game.currentTurn = "computer";
-	game.computerAttack();
-
-	expect(game.realPlayer.gameboard.missedAttacks).toEqual([
-		[0, 0],
-		[1, 1],
-	]);
-
-	Math.random.mockRestore();
+test("computer follows an adjacent hit without repeating shots", () => {
+  const game = readyGame();
+  game.attack([9, 9]);
+  game.computerAttack();
+  game.attack([8, 9]);
+  game.computerAttack();
+  expect(game.realPlayer.gameboard.successfulAttacks).toEqual([[0, 0], [1, 0]]);
 });
 
-test("game ends when all computer ships are sunk", () => {
-	const game = new Game();
-
-	game.computerPlayer.gameboard.placeShip(1, [[0, 0]]);
-
-	game.attack([0, 0]);
-
-	expect(game.isGameOver()).toBe(true);
-});
-
-test("game continues while the computer still has an unsunk ship", () => {
-	const game = new Game();
-
-	game.computerPlayer.gameboard.placeShip(2, [
-		[0, 0],
-		[0, 1],
-	]);
-
-	game.attack([0, 0]);
-
-	expect(game.isGameOver()).toBe(false);
-});
-
-test("setupGame places ships on both players' gameboards", () => {
-	const game = new Game();
-
-	game.setupGame();
-
-	expect(game.realPlayer.gameboard.ships.length).toBeGreaterThan(0);
-	expect(game.computerPlayer.gameboard.ships.length).toBeGreaterThan(0);
-});
-
-test("randomizePlayerShips places the full fleet", () => {
-	const game = new Game();
-
-	game.randomizePlayerShips();
-
-	const shipLengths = game.realPlayer.gameboard.ships
-		.map(({ ship }) => ship.length)
-		.sort((a, b) => b - a);
-
-	expect(shipLengths).toEqual([5, 4, 3, 3, 2]);
-});
-
-test("computer attacks an adjacent coordinate after hitting a ship", () => {
-	const game = new Game();
-
-	const ship = game.realPlayer.gameboard.placeShip(2, [
-		[0, 0],
-		[1, 0],
-	]);
-
-	jest
-		.spyOn(Math, "random")
-		.mockReturnValueOnce(0)
-		.mockReturnValueOnce(0)
-		.mockReturnValueOnce(0)
-		.mockReturnValueOnce(0)
-		.mockReturnValueOnce(0.9)
-		.mockReturnValueOnce(0.9);
-
-	game.currentTurn = "computer";
-	game.computerAttack();
-
-	expect(ship.hits).toBe(1);
-
-	game.currentTurn = "computer";
-	game.computerAttack();
-
-	expect(ship.hits).toBe(2);
-	expect(game.computerAttacks.has("1,0")).toBe(true);
-
-	Math.random.mockRestore();
+test.each(["real", "computer"])("final %s hit completes the round and blocks every further action", winner => {
+  const game = readyGame();
+  const board = winner === "real" ? game.computerPlayer.gameboard : game.realPlayer.gameboard;
+  const cells = board.ships.flatMap(entry => entry.coordinates);
+  const last = cells.pop();
+  cells.forEach(cell => board.receiveAttack(cell));
+  if (winner === "real") {
+    expect(game.attack(last).accepted).toBe(true);
+  } else {
+    game.currentTurn = "computer";
+    game.computerTargets = [last];
+    expect(game.computerAttack().accepted).toBe(true);
+  }
+  expect(game.phase).toBe("completed");
+  expect(game.winner).toBe(winner);
+  expect(game.isGameOver()).toBe(true);
+  expect(game.attack([9, 9]).accepted).toBe(false);
+  expect(game.computerAttack().accepted).toBe(false);
+  expect(game.randomizePlayerShips()).toBe(false);
+  expect(game.startBattle()).toBe(false);
+  expect(game.setupGame()).toBe(false);
 });

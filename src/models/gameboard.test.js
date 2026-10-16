@@ -115,7 +115,7 @@ test("accepts contiguous coordinates in reverse order", () => {
   expect(new Gameboard().placeShip(3, [[2, 9], [1, 9], [0, 9]])).not.toBeNull();
 });
 
-test.each([[-1, 0], [10, 0], [0, 1.5], [NaN, 0], ["0", 0], null, [0]])(
+test.each([[-1, 0], [10, 0], [0, 1.5], [NaN, 0], ["0", 0], null, [0]].map(coordinate => [coordinate]))(
   "rejects malformed or out-of-bounds attacks %#", coordinate => {
     const board = new Gameboard();
     expect(board.receiveAttack(coordinate)).toEqual({ accepted: false });

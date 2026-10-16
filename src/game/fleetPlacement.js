@@ -1,0 +1,34 @@
+import Gameboard, { BOARD_SIZE } from "../models/gameboard.js";
+
+export const FLEET_LENGTHS = Object.freeze([5, 4, 3, 3, 2]);
+
+// Owns fleet generation; Gameboard remains the authority on legal placement.
+export default class FleetPlacement {
+  constructor(random = Math.random) {
+    this.random = random;
+  }
+
+  createBoard() {
+    const board = new Gameboard();
+    for (const length of FLEET_LENGTHS) {
+      const candidates = [];
+      for (const horizontal of [true, false]) {
+        for (let y = 0; y < BOARD_SIZE; y += 1) {
+          for (let x = 0; x < BOARD_SIZE; x += 1) {
+            const coordinates = Array.from({ length }, (_, offset) => [
+              horizontal ? x + offset : x,
+              horizontal ? y : y + offset,
+            ]);
+            if (board.canPlaceShip(length, coordinates)) candidates.push(coordinates);
+          }
+        }
+      }
+      // Sampling valid candidates avoids an unbounded random retry loop.
+      const coordinates = candidates[Math.floor(this.random() * candidates.length)];
+      if (!coordinates || !board.placeShip(length, coordinates)) {
+        throw new Error("Unable to generate a legal fleet.");
+      }
+    }
+    return board;
+  }
+}

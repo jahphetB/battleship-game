@@ -1,226 +1,101 @@
 import Player from "../models/player.js";
+import { BOARD_SIZE } from "../models/gameboard.js";
+import FleetPlacement, { FLEET_LENGTHS } from "./fleetPlacement.js";
 
 export default class Game {
-	constructor() {
-		this.realPlayer = new Player("real");
-		this.computerPlayer = new Player("computer");
-		this.currentTurn = "real";
-        this.computerAttacks = new Set();
-        this.computerTargets = [];
-        this.hasBattleStarted = false;
-	}
+  constructor({ fleetPlacement = new FleetPlacement(), random = Math.random } = {}) {
+    this.realPlayer = new Player("real");
+    this.computerPlayer = new Player("computer");
+    this.fleetPlacement = fleetPlacement;
+    this.random = random;
+    this.currentTurn = "real";
+    this.computerTargets = [];
+    this.phase = "setup";
+    this.winner = null;
+  }
 
-    canRandomizeShips() {
-        return !this.hasBattleStarted;
+  setupGame() {
+    if (this.phase !== "setup") return false;
+    this.realPlayer.gameboard = this.fleetPlacement.createBoard();
+    this.computerPlayer.gameboard = this.fleetPlacement.createBoard();
+    this.phase = "placement";
+    return true;
+  }
+
+  canRandomizeShips() {
+    return this.phase === "placement";
+  }
+
+  randomizePlayerShips(playerType = "real") {
+    if (!this.canRandomizeShips()) return false;
+    const player = playerType === "real" ? this.realPlayer :
+      playerType === "computer" ? this.computerPlayer : null;
+    if (!player) return false;
+    player.gameboard = this.fleetPlacement.createBoard();
+    return true;
+  }
+
+  startBattle() {
+    if (this.phase !== "placement" ||
+        !this.realPlayer.gameboard.hasCompleteFleet(FLEET_LENGTHS) ||
+        !this.computerPlayer.gameboard.hasCompleteFleet(FLEET_LENGTHS)) return false;
+    this.phase = "battle";
+    return true;
+  }
+
+  attack(coordinates) {
+    if (this.phase !== "battle" || this.currentTurn !== "real") return { accepted: false };
+    const outcome = this.computerPlayer.gameboard.receiveAttack(coordinates);
+    if (outcome.accepted) this.finishTurn("real", this.computerPlayer.gameboard, "computer");
+    return outcome;
+  }
+
+  computerAttack() {
+    if (this.phase !== "battle" || this.currentTurn !== "computer") return { accepted: false };
+    const board = this.realPlayer.gameboard;
+    let coordinates;
+    while (this.computerTargets.length > 0 && !coordinates) {
+      const target = this.computerTargets.shift();
+      if (!board.hasAttackAt(target)) coordinates = target;
     }
-
-	attack(coordinates) {
-        if (this.currentTurn !== "real" || this.isGameOver()) {
-            return;
+    if (!coordinates) {
+      const available = [];
+      for (let y = 0; y < BOARD_SIZE; y += 1) {
+        for (let x = 0; x < BOARD_SIZE; x += 1) {
+          if (!board.hasAttackAt([x, y])) available.push([x, y]);
         }
-
-        this.hasBattleStarted = true;
-        this.computerPlayer.gameboard.receiveAttack(coordinates);
-        this.currentTurn = "computer";
+      }
+      if (available.length === 0) return { accepted: false };
+      coordinates = available[Math.floor(this.random() * available.length)];
     }
-
-    computerAttack() {
-        if (
-            this.currentTurn !== "computer" ||
-            this.isGameOver()
-        ) {
-            return;
-        }
-
-        this.hasBattleStarted = true;
-
-        let coordinates;
-
-        if (this.computerTargets.length > 0) {
-            coordinates = this.computerTargets.shift();
-        } else {
-            let key;
-
-            do {
-                const x = Math.floor(Math.random() * 10);
-                const y = Math.floor(Math.random() * 10);
-
-                coordinates = [x, y];
-                key = `${x},${y}`;
-            } while (this.computerAttacks.has(key));
-        }
-
-        const key = `${coordinates[0]},${coordinates[1]}`;
-
-        this.computerAttacks.add(key);
-
-        this.realPlayer.gameboard.receiveAttack(coordinates);
-
-        const wasHit =
-            this.realPlayer.gameboard.successfulAttacks.some(
-                ([x, y]) =>
-                    x === coordinates[0] &&
-                    y === coordinates[1]
-            );
-
-        if (wasHit) {
-            this.queueAdjacentTargets(coordinates);
-        }
-
-        this.currentTurn = "real";
+    const outcome = board.receiveAttack(coordinates);
+    if (outcome.accepted) {
+      if (outcome.hit) this.queueAdjacentTargets(coordinates);
+      this.finishTurn("computer", board, "real");
     }
+    return outcome;
+  }
 
-    isGameOver() {
-        const realPlayerLost =
-            this.realPlayer.gameboard.ships.length > 0 &&
-            this.realPlayer.gameboard.allShipsSunk();
-
-        const computerPlayerLost =
-            this.computerPlayer.gameboard.ships.length > 0 &&
-            this.computerPlayer.gameboard.allShipsSunk();
-
-        return realPlayerLost || computerPlayerLost;
+  finishTurn(attacker, defendingBoard, nextTurn) {
+    if (defendingBoard.allShipsSunk()) {
+      this.winner = attacker;
+      this.phase = "completed";
+    } else {
+      this.currentTurn = nextTurn;
     }
+  }
 
-    setupGame() {
-        this.realPlayer.gameboard.placeShip(5, [
-            [0, 0],
-            [0, 1],
-            [0, 2],
-            [0, 3],
-            [0, 4],
-        ]);
+  isGameOver() {
+    return this.phase === "completed";
+  }
 
-        this.realPlayer.gameboard.placeShip(4, [
-            [2, 0],
-            [2, 1],
-            [2, 2],
-            [2, 3],
-        ]);
-
-        this.realPlayer.gameboard.placeShip(3, [
-            [4, 0],
-            [4, 1],
-            [4, 2],
-        ]);
-
-        this.realPlayer.gameboard.placeShip(3, [
-            [6, 0],
-            [6, 1],
-            [6, 2],
-        ]);
-
-        this.realPlayer.gameboard.placeShip(2, [
-            [8, 0],
-            [8, 1],
-        ]);
-
-        this.computerPlayer.gameboard.placeShip(5, [
-            [0, 5],
-            [0, 6],
-            [0, 7],
-            [0, 8],
-            [0, 9],
-        ]);
-
-        this.computerPlayer.gameboard.placeShip(4, [
-            [2, 6],
-            [3, 6],
-            [4, 6],
-            [5, 6],
-        ]);
-
-        this.computerPlayer.gameboard.placeShip(3, [
-            [4, 8],
-            [5, 8],
-            [6, 8],
-        ]);
-
-        this.computerPlayer.gameboard.placeShip(3, [
-            [7, 2],
-            [7, 3],
-            [7, 4],
-        ]);
-
-        this.computerPlayer.gameboard.placeShip(2, [
-            [9, 8],
-            [9, 9],
-        ]);
+  queueAdjacentTargets([x, y]) {
+    for (const [targetX, targetY] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
+      if (targetX < 0 || targetX >= BOARD_SIZE || targetY < 0 || targetY >= BOARD_SIZE) continue;
+      if (!this.realPlayer.gameboard.hasAttackAt([targetX, targetY]) &&
+          !this.computerTargets.some(([queuedX, queuedY]) => queuedX === targetX && queuedY === targetY)) {
+        this.computerTargets.push([targetX, targetY]);
+      }
     }
-
-    randomizePlayerShips() {
-        if (!this.canRandomizeShips()) {
-            return;
-        }
-
-        const fleet = [5, 4, 3, 3, 2];
-
-        this.realPlayer.gameboard.ships = [];
-
-        fleet.forEach((length) => {
-            let placedShip = null;
-
-            while (!placedShip) {
-                const isHorizontal = Math.random() < 0.5;
-
-                const startX = isHorizontal
-                    ? Math.floor(Math.random() * (11 - length))
-                    : Math.floor(Math.random() * 10);
-
-                const startY = isHorizontal
-                    ? Math.floor(Math.random() * 10)
-                    : Math.floor(Math.random() * (11 - length));
-
-                const coordinates = [];
-
-                for (let i = 0; i < length; i += 1) {
-                    coordinates.push([
-                        isHorizontal ? startX + i : startX,
-                        isHorizontal ? startY : startY + i,
-                    ]);
-                }
-
-                placedShip = this.realPlayer.gameboard.placeShip(
-                    length,
-                    coordinates
-                );
-            }
-        });
-    }
-
-    getAdjacentCoordinates([x, y]) {
-        return [
-            [x + 1, y],
-            [x - 1, y],
-            [x, y + 1],
-            [x, y - 1],
-        ].filter(
-            ([targetX, targetY]) =>
-                targetX >= 0 &&
-                targetX <= 9 &&
-                targetY >= 0 &&
-                targetY <= 9
-        );
-    }
-
-    queueAdjacentTargets(coordinates) {
-        const adjacentCoordinates =
-            this.getAdjacentCoordinates(coordinates);
-
-        adjacentCoordinates.forEach(([x, y]) => {
-            const key = `${x},${y}`;
-
-            const alreadyQueued = this.computerTargets.some(
-                ([targetX, targetY]) =>
-                    targetX === x && targetY === y
-            );
-
-            if (
-                !this.computerAttacks.has(key) &&
-                !alreadyQueued
-            ) {
-                this.computerTargets.push([x, y]);
-            }
-        });
-    }
+  }
 }
