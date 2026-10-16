@@ -45,24 +45,6 @@
 .briefing-rules li + li { margin-top: 0.4rem; }
 .briefing-rules li::marker { color: var(--radar); font-weight: 800; }
 
-.campaign-preview {
-  padding: 1rem;
-  border: 1px solid rgba(132, 169, 103, 0.25);
-  border-radius: 5px;
-  background: rgba(7, 27, 41, 0.55);
-}
-
-.campaign-levels {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
-  list-style: none;
-  margin: 0 0 0.75rem;
-  padding: 0;
-}
-
-.campaign-levels li { font-weight: 700; }
-.campaign-levels span { display: block; color: var(--radar); font: 1.4rem monospace; margin-bottom: 0.2rem; }
 .briefing-note, .mode-detail { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; }
 .mode-picker { display: grid; gap: 0.6rem; min-width: 0; margin: 0; padding: 0; border: 0; }
 
@@ -83,3 +65,7 @@
 .briefing-submit { width: 100%; margin-bottom: 0.35rem; }
 .briefing-error { color: #ff9a87; }
 .briefing-error:empty { display: none; }
+
+.difficulty-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.difficulty-picker .briefing-note { grid-column: 1 / -1; }
+@media (max-width: 600px) { .difficulty-picker { grid-template-columns: 1fr; } }

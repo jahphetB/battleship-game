@@ -114,7 +114,7 @@ test.each(["real", "computer"])("final %s hit completes the round and blocks eve
     expect(game.attack(last).accepted).toBe(true);
   } else {
     game.activePlayerIndex = 1;
-    game.computerTargets = [last];
+    game.computerStrategy = { nextAttack: () => last, recordResult: jest.fn() };
     expect(game.computerAttack().accepted).toBe(true);
   }
   expect(game.phase).toBe("completed");

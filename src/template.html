@@ -25,16 +25,6 @@
                 </ol>
             </section>
 
-            <section class="campaign-preview" aria-labelledby="campaign-title">
-                <h3 id="campaign-title">Three levels ahead</h3>
-                <ol class="campaign-levels" aria-label="Planned computer campaign">
-                    <li><span>01</span> Easy</li>
-                    <li><span>02</span> Medium</li>
-                    <li><span>03</span> Hard</li>
-                </ol>
-                <p class="briefing-note">The three-level campaign is coming soon. Today, take on our standard computer opponent.</p>
-            </section>
-
             <fieldset class="mode-picker">
                 <legend>Choose your opponent</legend>
                 <label class="mode-option">
@@ -47,6 +37,23 @@
                 </label>
             </fieldset>
 
+            <fieldset id="difficulty-picker" class="mode-picker difficulty-picker">
+                <legend>Computer difficulty</legend>
+                <label class="mode-option">
+                    <input type="radio" name="difficulty" value="easy" checked>
+                    <span><strong>Level 1: Easy</strong><span class="mode-detail">Relaxed search. Often overlooks useful clues.</span></span>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="difficulty" value="medium">
+                    <span><strong>Level 2: Medium</strong><span class="mode-detail">Follows hits and tracks ship direction.</span></span>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="difficulty" value="hard">
+                    <span><strong>Level 3: Hard</strong><span class="mode-detail">Precise pursuit and smarter searching.</span></span>
+                </label>
+                <p class="briefing-note">Three difficulty levels. Each round uses your selected level.</p>
+            </fieldset>
+
             <p class="briefing-error" role="alert"></p>
             <button class="command-button briefing-submit" type="submit">Deploy Fleet</button>
         </form>
@@ -56,6 +63,7 @@
             <p class="eyebrow">Naval Command</p>
             <h1>Battleship</h1>
             <p class="subheading">Deploy your fleet. Track enemy movement. Dominate the sea.</p>
+            <p id="round-mode" class="round-mode" hidden></p>
         </header>
 
         <section id="handoff-panel" class="handoff-panel" aria-labelledby="handoff-title" hidden>

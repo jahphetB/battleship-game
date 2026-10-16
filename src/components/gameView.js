@@ -2,9 +2,15 @@ import { renderBoard } from "./board.js";
 import { renderStatus } from "./status.js";
 import { renderHandoff } from "./handoffPanel.js";
 import { getGameViewState } from "./gameViewState.js";
+import { DIFFICULTIES } from "../game/computer/createComputerStrategy.js";
 
 export function renderGame(game, placementControls) {
   const state = getGameViewState(game);
+  const modeLabel = document.querySelector("#round-mode");
+  modeLabel.hidden = !game.mode;
+  modeLabel.textContent = game.mode === "computer"
+    ? `Computer / Level ${DIFFICULTIES.indexOf(game.difficulty) + 1}: ${game.difficulty[0].toUpperCase()}${game.difficulty.slice(1)}`
+    : "Local two-player";
   const ownBoard = document.querySelector("#player-board");
   const opponentBoard = document.querySelector("#opponent-board");
   // Clear private cells before displaying the pass-device screen.

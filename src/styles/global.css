@@ -122,3 +122,5 @@ h1 {
 	}
 
 }
+
+.round-mode { display: inline-block; margin: 1rem 0 0; padding: 0.5rem 0.8rem; border: 1px solid var(--military-light); border-radius: 4px; color: #d8dfca; background: rgba(7, 27, 41, 0.65); font: 0.85rem monospace; }

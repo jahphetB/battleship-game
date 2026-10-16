@@ -5,6 +5,14 @@ export default class WelcomeDialog {
     this.form = element.querySelector("form");
     this.onConfirm = onConfirm;
     this.focusAfterClose = focusAfterClose;
+    const difficultyPicker = element.querySelector("#difficulty-picker");
+    const updateMode = () => {
+      const computerMode = this.form.elements.mode.value === "computer";
+      difficultyPicker.hidden = !computerMode;
+      difficultyPicker.disabled = !computerMode;
+    };
+    this.form.addEventListener("change", updateMode);
+    updateMode();
 
     this.element.addEventListener("cancel", event => event.preventDefault());
     this.element.addEventListener("keydown", event => {
@@ -24,7 +32,8 @@ export default class WelcomeDialog {
     this.form.addEventListener("submit", event => {
       event.preventDefault();
       const mode = this.form.elements.mode.value;
-      if (!this.onConfirm({ mode })) {
+      const difficulty = mode === "computer" ? this.form.elements.difficulty.value : null;
+      if (!this.onConfirm({ mode, difficulty })) {
         this.element.querySelector("[role=alert]").textContent = "Choose an available mode to continue.";
         return;
       }

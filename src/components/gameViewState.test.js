@@ -61,7 +61,7 @@ test("computer turns and defeats retain the human board perspective", () => {
   const cells = game.players[0].gameboard.ships.flatMap(entry => entry.coordinates);
   const last = cells.pop();
   cells.forEach(coordinate => game.players[0].gameboard.receiveAttack(coordinate));
-  game.computerTargets = [last];
+  game.computerStrategy = { nextAttack: () => last, recordResult: jest.fn() };
   game.computerAttack();
   expect(game.winnerIndex).toBe(1);
   expect(getGameViewState(game).ownBoard).toBe(game.players[0].gameboard);
