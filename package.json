@@ -1,10 +1,10 @@
 {
-  "name": "webpack-template",
+  "name": "battleship-game",
   "version": "1.0.0",
-  "description": "",
+  "description": "A naval-themed Battleship game built with JavaScript and Jest.",
   "main": "webpack.common.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "dev": "webpack serve --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
     "testJ": "jest",
@@ -12,16 +12,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jahphetB/webpack-template.git"
+    "url": "git+https://github.com/jahphetB/battleship-game.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "bugs": {
-    "url": "https://github.com/jahphetB/webpack-template/issues"
+    "url": "https://github.com/jahphetB/battleship-game/issues"
   },
-  "homepage": "https://github.com/jahphetB/webpack-template#readme",
+  "homepage": "https://jahphetb.github.io/battleship-game/",
   "devDependencies": {
     "@babel/preset-env": "^7.29.7",
     "css-loader": "^7.1.5",
