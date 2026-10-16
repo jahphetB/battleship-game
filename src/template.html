@@ -18,7 +18,8 @@
                 <h3 id="rules-title">Your orders</h3>
                 <ol class="briefing-rules">
                     <li>Command five ships (lengths 5, 4, 3, 3, 2) on a 10 × 10 grid.</li>
-                    <li>Randomize your fleet. Select Start Battle, or Confirm Fleet in two-player mode.</li>
+                    <li>Randomize your fleet, or drag ships into place. Rotate as needed. You can also select a ship and click its starting cell.</li>
+                    <li>Place all five ships, then select Start Battle (or Confirm Fleet for two players).</li>
                     <li>Take turns firing one shot. Hits and misses stay marked; you cannot fire at the same cell twice.</li>
                     <li>Sink every enemy ship to win. Enemy positions stay hidden during battle.</li>
                 </ol>
@@ -76,6 +77,17 @@
         <div id="boards" class="boards">
             <section class="board-section">
                 <h2 id="own-fleet-title">Your Fleet</h2>
+                <section id="placement-controls" class="placement-controls" aria-labelledby="placement-title" hidden>
+                    <h3 id="placement-title">Position your fleet</h3>
+                    <p class="placement-help">Drag a ship from the tray or board. Or select a ship, then tap/click its starting cell. Use arrow keys on the grid, R to rotate, and Escape to cancel.</p>
+                    <div class="ship-tray" role="group" aria-label="Fleet ships"></div>
+                    <div class="placement-actions">
+                        <button id="rotate-ship" class="command-button" type="button">Orientation: Horizontal</button>
+                        <button id="clear-fleet" class="command-button" type="button">Clear Fleet</button>
+                        <span id="placement-progress"></span>
+                    </div>
+                    <p id="placement-message" role="status" aria-live="polite"></p>
+                </section>
                 <div id="player-board" aria-label="Your fleet"></div>
             </section>
 

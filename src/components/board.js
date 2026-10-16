@@ -1,5 +1,5 @@
-function hasShipAt(gameboard, x, y) {
-	return gameboard.ships.some(({ coordinates }) =>
+function shipAt(gameboard, x, y) {
+	return gameboard.ships.find(({ coordinates }) =>
 		coordinates.some(
 			([shipX, shipY]) => shipX === x && shipY === y
 		)
@@ -49,11 +49,10 @@ export function renderBoard(gameboard, container, { showShips = false, interacti
 				`${String.fromCharCode(65 + x)}${y + 1}`
 			);
 
-			if (
-				showShips &&
-				hasShipAt(gameboard, x, y)
-			) {
+			const ship = showShips ? shipAt(gameboard, x, y) : null;
+			if (ship) {
 				cell.classList.add("ship");
+				cell.dataset.shipId = ship.id;
 			}
 
 			if (

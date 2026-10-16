@@ -10,8 +10,8 @@ export function renderStatus(game, status) {
     message = `Pass the device to ${game.currentPlayer.name}.`;
   } else if (game.phase === "placement") {
     state = "deployment";
-    message = game.mode === "human" ? `${game.currentPlayer.name}: Randomize your fleet, then select Confirm Fleet.`
-      : "DEPLOYMENT: Randomize your fleet, then select Start Battle when ready.";
+    message = game.mode === "human" ? `${game.currentPlayer.name}: Position your fleet, then select Confirm Fleet.`
+      : "DEPLOYMENT: Position your fleet manually or randomize, then select Start Battle.";
   } else if (game.phase === "battle") {
     state = game.currentPlayer.type === "human" ? "player" : "computer";
     message = game.mode === "human" ? `${game.currentPlayer.name}'s turn: Select a target in enemy waters.`

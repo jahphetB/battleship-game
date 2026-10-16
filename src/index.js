@@ -1,19 +1,27 @@
 import Game from "./game/game.js";
 import { renderGame, focusGameAction } from "./components/gameView.js";
 import WelcomeDialog from "./components/welcomeDialog.js";
+import PlacementControls from "./components/placementControls.js";
 import "./styles/global.css";
 import "./styles/commandPanel.css";
 import "./styles/board.css";
 import "./styles/dialogs.css";
 import "./styles/handoffPanel.css";
+import "./styles/placementControls.css";
 
 const game = new Game();
-renderGame(game);
+const placementControls = new PlacementControls({
+  game,
+  panel: document.querySelector("#placement-controls"),
+  board: document.querySelector("#player-board"),
+  onChange: () => renderGame(game, placementControls),
+});
+renderGame(game, placementControls);
 
 const welcome = new WelcomeDialog(document.querySelector("#welcome-dialog"), {
   onConfirm: options => {
     if (!game.setupGame(options)) return false;
-    renderGame(game);
+    renderGame(game, placementControls);
     return true;
   },
   focusAfterClose: () => focusGameAction(game),
@@ -27,25 +35,25 @@ opponentBoard.addEventListener("click", event => {
   const outcome = game.attack([Number(cell.dataset.x), Number(cell.dataset.y)]);
   if (!outcome.accepted) return;
   if (game.mode === "computer") game.computerAttack();
-  renderGame(game);
+  renderGame(game, placementControls);
   focusGameAction(game);
 });
 
 document.querySelector("#randomize-ships").addEventListener("click", () => {
-  if (game.randomizePlayerShips()) renderGame(game);
+  if (game.randomizePlayerShips()) renderGame(game, placementControls);
 });
 
 document.querySelector("#start-battle").addEventListener("click", () => {
   const accepted = game.mode === "human" ? game.confirmFleet() : game.startBattle();
   if (accepted) {
-    renderGame(game);
+    renderGame(game, placementControls);
     focusGameAction(game);
   }
 });
 
 document.querySelector("#handoff-continue").addEventListener("click", () => {
   if (game.acknowledgeHandoff()) {
-    renderGame(game);
+    renderGame(game, placementControls);
     focusGameAction(game);
   }
 });

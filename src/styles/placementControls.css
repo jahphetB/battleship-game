@@ -1,0 +1,44 @@
+.placement-controls {
+  margin-bottom: 1rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(132, 169, 103, 0.3);
+  border-radius: 5px;
+  background: rgba(7, 27, 41, 0.6);
+}
+
+.placement-controls h3 { margin: 0 0 0.5rem; color: #d8dfca; font-size: 0.95rem; }
+.placement-help { margin: 0 0 0.75rem; color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; }
+.ship-tray { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+.ship-choice {
+  min-width: 0;
+  padding: 0.6rem;
+  border: 1px solid var(--military-light);
+  border-radius: 4px;
+  color: var(--text-main);
+  background: #202e28;
+  font: inherit;
+  text-align: left;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.ship-choice[aria-pressed="true"] { outline: 2px solid var(--radar); outline-offset: 1px; background: #34402e; }
+.ship-choice:focus-visible { outline: 3px solid #d8dfca; outline-offset: 2px; }
+.ship-name { display: block; font-size: 0.8rem; font-weight: 700; overflow-wrap: anywhere; }
+.ship-segments { display: flex; gap: 2px; margin: 0.4rem 0; }
+.ship-segments i { width: 14px; height: 10px; border: 1px solid #9aa5a3; border-radius: 2px; background: var(--steel); }
+.ship-placement-state { display: block; color: var(--text-muted); font-size: 0.7rem; }
+.placement-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem; margin-top: 0.85rem; }
+.placement-actions .command-button { padding: 0.65rem; font-size: 0.7rem; }
+#placement-progress { color: var(--text-muted); font-size: 0.8rem; }
+#placement-message { min-height: 2.5em; margin: 1rem 0 0; color: #d8dfca; font-size: 0.8rem; line-height: 1.5; }
+#player-board.is-placement .board-cell { cursor: crosshair; touch-action: manipulation; }
+#player-board.is-placement .ship { cursor: grab; touch-action: none; }
+#player-board .placement-valid { outline: 2px solid #b7e28a; outline-offset: -2px; background: #386442; }
+#player-board .placement-invalid { outline: 2px solid #ff9a87; outline-offset: -2px; background: #783b33; }
+
+@media (max-width: 600px) {
+  .ship-tray { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .placement-controls { padding: 0.65rem; }
+}
