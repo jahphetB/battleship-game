@@ -18,7 +18,7 @@
                 <h3 id="rules-title">Your orders</h3>
                 <ol class="briefing-rules">
                     <li>Command five ships (lengths 5, 4, 3, 3, 2) on a 10 × 10 grid.</li>
-                    <li>Randomize your fleet, then select Start Battle.</li>
+                    <li>Randomize your fleet. Select Start Battle, or Confirm Fleet in two-player mode.</li>
                     <li>Take turns firing one shot. Hits and misses stay marked; you cannot fire at the same cell twice.</li>
                     <li>Sink every enemy ship to win. Enemy positions stay hidden during battle.</li>
                 </ol>
@@ -40,9 +40,9 @@
                     <input type="radio" name="mode" value="computer" checked>
                     <span><strong>Human vs computer</strong><span class="mode-detail">You command your fleet. The computer returns fire.</span></span>
                 </label>
-                <label class="mode-option mode-option-unavailable">
-                    <input type="radio" name="mode" value="human" disabled aria-describedby="local-mode-note">
-                    <span><strong>Human vs human <span class="mode-badge">Coming soon</span></strong><span id="local-mode-note" class="mode-detail">Two commanders, one device, private alternating turns.</span></span>
+                <label class="mode-option">
+                    <input type="radio" name="mode" value="human" aria-describedby="local-mode-note">
+                    <span><strong>Human vs human</strong><span id="local-mode-note" class="mode-detail">Two commanders, one device. Look away during the other player's setup and pass the device after each shot.</span></span>
                 </label>
             </fieldset>
 
@@ -57,23 +57,31 @@
             <p class="subheading">Deploy your fleet. Track enemy movement. Dominate the sea.</p>
         </header>
 
-        <section class="command-panel">
-            <div id="game-status" role="status" aria-live="polite"></div>
+        <section id="handoff-panel" class="handoff-panel" aria-labelledby="handoff-title" hidden>
+            <p class="eyebrow">Fleet communications / Private handoff</p>
+            <h2 id="handoff-title">Pass the device</h2>
+            <p class="shot-summary" hidden></p>
+            <p class="handoff-instruction"></p>
+            <button id="handoff-continue" class="command-button" type="button">Continue</button>
+        </section>
+
+        <section id="command-panel" class="command-panel">
+            <div id="game-status" role="status" aria-live="polite" tabindex="-1"></div>
             <div class="command-actions">
                 <button id="randomize-ships" class="command-button" type="button">Randomize Ships</button>
                 <button id="start-battle" class="command-button" type="button">Start Battle</button>
             </div>
         </section>
 
-        <div class="boards">
+        <div id="boards" class="boards">
             <section class="board-section">
-                <h2>Your Fleet</h2>
+                <h2 id="own-fleet-title">Your Fleet</h2>
                 <div id="player-board" aria-label="Your fleet"></div>
             </section>
 
-            <section class="board-section">
-                <h2>Enemy Waters</h2>
-                <div id="computer-board" aria-label="Enemy waters"></div>
+            <section id="opponent-section" class="board-section">
+                <h2 id="opponent-waters-title">Enemy Waters</h2>
+                <div id="opponent-board" aria-label="Enemy waters"></div>
             </section>
         </div>
     </main>

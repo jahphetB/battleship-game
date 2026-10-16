@@ -9,7 +9,7 @@ export default class WelcomeDialog {
     this.element.addEventListener("cancel", event => event.preventDefault());
     this.element.addEventListener("keydown", event => {
       if (event.key !== "Tab") return;
-      const controls = [...this.form.querySelectorAll("input:not(:disabled), button:not(:disabled)")];
+      const controls = [...this.form.querySelectorAll("input:not(:disabled):checked, button:not(:disabled)")];
       const first = controls[0];
       const last = controls[controls.length - 1];
       const active = this.element.ownerDocument.activeElement;
@@ -29,7 +29,7 @@ export default class WelcomeDialog {
         return;
       }
       this.element.close();
-      this.focusAfterClose.focus();
+      this.focusAfterClose();
     });
   }
 

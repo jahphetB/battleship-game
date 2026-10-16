@@ -14,6 +14,7 @@ export default class Game {
     this.phase = "setup";
     this.mode = null;
     this.winnerIndex = null;
+    this.lastShot = null;
   }
 
   get currentPlayer() {
@@ -36,7 +37,7 @@ export default class Game {
     ];
     for (const player of this.players) player.gameboard = this.fleetPlacement.createBoard();
     this.mode = mode;
-    if (mode === "human") this.beginHandoff(0, "placement");
+    if (mode === "human") this.#beginHandoff(0, "placement");
     else this.phase = "placement";
     return true;
   }
@@ -69,12 +70,12 @@ export default class Game {
         !this.currentPlayer.gameboard.hasCompleteFleet(FLEET_LENGTHS)) return false;
     if (this.activePlayerIndex === 1 && !this.hasReadyFleets()) return false;
     this.readyPlayers[this.activePlayerIndex] = true;
-    if (this.activePlayerIndex === 0) this.beginHandoff(1, "placement");
-    else this.beginHandoff(0, "battle");
+    if (this.activePlayerIndex === 0) this.#beginHandoff(1, "placement");
+    else this.#beginHandoff(0, "battle");
     return true;
   }
 
-  beginHandoff(playerIndex, nextPhase) {
+  #beginHandoff(playerIndex, nextPhase) {
     this.activePlayerIndex = playerIndex;
     this.pendingPhase = nextPhase;
     this.phase = "handoff";
@@ -91,13 +92,16 @@ export default class Game {
     if (this.phase !== "battle" || this.currentPlayer.type !== "human") return { accepted: false };
     const board = this.opponent.gameboard;
     const outcome = board.receiveAttack(coordinates);
-    if (outcome.accepted) this.finishTurn(board);
+    if (outcome.accepted) {
+      this.#recordShot(coordinates, outcome);
+      this.#finishTurn(board);
+    }
     return outcome;
   }
 
   computerAttack() {
     if (this.phase !== "battle" || this.currentPlayer.type !== "computer") return { accepted: false };
-    const board = this.players[0].gameboard;
+    const board = this.opponent.gameboard;
     let coordinates;
     while (this.computerTargets.length > 0 && !coordinates) {
       const target = this.computerTargets.shift();
@@ -115,31 +119,41 @@ export default class Game {
     }
     const outcome = board.receiveAttack(coordinates);
     if (outcome.accepted) {
-      if (outcome.hit) this.queueAdjacentTargets(coordinates);
-      this.finishTurn(board);
+      this.#recordShot(coordinates, outcome);
+      if (outcome.hit) this.#queueAdjacentTargets(coordinates);
+      this.#finishTurn(board);
     }
     return outcome;
   }
 
-  finishTurn(defendingBoard) {
+  #finishTurn(defendingBoard) {
     if (defendingBoard.allShipsSunk()) {
       this.winnerIndex = this.activePlayerIndex;
       this.phase = "completed";
     } else if (this.mode === "human") {
-      this.beginHandoff(1 - this.activePlayerIndex, "battle");
+      this.#beginHandoff(1 - this.activePlayerIndex, "battle");
     } else {
       this.activePlayerIndex = 1 - this.activePlayerIndex;
     }
+  }
+
+  #recordShot(coordinates, outcome) {
+    this.lastShot = {
+      playerIndex: this.activePlayerIndex,
+      coordinates: [...coordinates],
+      hit: outcome.hit,
+      sunk: outcome.sunk,
+    };
   }
 
   isGameOver() {
     return this.phase === "completed";
   }
 
-  queueAdjacentTargets([x, y]) {
+  #queueAdjacentTargets([x, y]) {
     for (const [targetX, targetY] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
       if (targetX < 0 || targetX >= BOARD_SIZE || targetY < 0 || targetY >= BOARD_SIZE) continue;
-      if (!this.players[0].gameboard.hasAttackAt([targetX, targetY]) &&
+      if (!this.opponent.gameboard.hasAttackAt([targetX, targetY]) &&
           !this.computerTargets.some(([queuedX, queuedY]) => queuedX === targetX && queuedY === targetY)) {
         this.computerTargets.push([targetX, targetY]);
       }

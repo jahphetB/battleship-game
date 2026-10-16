@@ -81,6 +81,7 @@ test("each accepted local shot requires a handoff and never triggers computer fi
   expect(game.phase).toBe("handoff");
   expect(game.currentPlayer.name).toBe("Player 2");
   expect(game.players[1].gameboard.missedAttacks).toEqual([[9, 9]]);
+  expect(game.lastShot).toEqual({ playerIndex: 0, coordinates: [9, 9], hit: false, sunk: false });
   expect(game.players[0].gameboard.missedAttacks).toEqual([]);
   expect(game.attack([8, 9]).accepted).toBe(false);
   expect(game.computerAttack().accepted).toBe(false);
@@ -91,6 +92,7 @@ test("each accepted local shot requires a handoff and never triggers computer fi
   expect(game.players[0].gameboard.missedAttacks).toEqual([[9, 9]]);
   expect(game.phase).toBe("handoff");
   expect(game.activePlayerIndex).toBe(0);
+  expect(game.lastShot.playerIndex).toBe(1);
 });
 
 test("repeated or invalid local shots preserve the active player and battle phase", () => {

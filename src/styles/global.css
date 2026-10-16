@@ -2,6 +2,8 @@
 	box-sizing: border-box;
 }
 
+[hidden] { display: none !important; }
+
 :root {
 	--military-dark: #101812;
 	--military-green: #283626;

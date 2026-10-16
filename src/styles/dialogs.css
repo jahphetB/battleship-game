@@ -80,9 +80,6 @@
 .mode-option:has(input:checked) { background: rgba(132, 169, 103, 0.12); }
 .mode-option:has(input:focus-visible) { outline: 3px solid var(--radar); outline-offset: 3px; }
 .mode-detail { display: block; margin-top: 0.3rem; }
-.mode-option-unavailable { border-color: rgba(104, 116, 85, 0.45); cursor: default; }
-.mode-option-unavailable strong { color: var(--text-muted); }
-.mode-badge { display: inline-block; margin-left: 0.25rem; font-size: 0.7rem; text-transform: uppercase; color: #e8c77f; }
 .briefing-submit { width: 100%; margin-bottom: 0.35rem; }
 .briefing-error { color: #ff9a87; }
 .briefing-error:empty { display: none; }
